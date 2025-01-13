@@ -1,4 +1,7 @@
 from fastapi import FastAPI
+from firebase_setup import admin_auth
+from interfaces import CreateUserBody
+
 
 app = FastAPI()
 
@@ -11,3 +14,11 @@ async def read_root():
 @app.get("/ping")
 async def ping():
     return {"message": "pong"}
+
+@app.post("/create/user")
+async def create_user(body: CreateUserBody):
+    try:
+     admin_auth.create_user(display_name=body.display_name, email=body.email)
+     return {"message": f"User {body.display_name} created successfully"}
+    except Exception as e:
+        return {"message": str(e)}

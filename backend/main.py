@@ -34,3 +34,28 @@ async def create_user(body: CreateUserBody):
      return {"message": f"User {body.display_name} created successfully"}
     except Exception as e:
         return {"message": str(e)}
+    
+@app.delete("/delete/user/{email}")
+async def delete_user(email: str):
+    try:
+     print(f"Deleting user {email}")
+     admin_auth.delete_user(email)
+     print(f"User {email} deleted successfully")
+     return {"message": f"User {email} deleted successfully"}
+    except Exception as e:
+        print(f"Error deleting user {email}")
+        return {"message": str(e)}
+    
+@app.get("/get/users")
+async def get_users():
+    user_list = []
+    users = admin_auth.list_users()
+    for user in users.users:
+        user_obj = {
+            "uid": user.uid,
+            "email": user.email,
+            "display_name": user.display_name
+        }
+        user_list.append(user_obj)
+
+    return user_list

@@ -1,9 +1,12 @@
 'use client';
 import axiosInstance from "@/utils/axiosInstance";
 import { createUserFirebaseBody } from "@/utils/interfaces";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const CreateUserForm = () => {
+  const router = useRouter();
   const [formData, setFormData] = useState<createUserFirebaseBody>({
     display_name: "",
     email: "",
@@ -26,7 +29,9 @@ const CreateUserForm = () => {
       const response = await axiosInstance.post("/create/user", formData);
 
       if (response.status === 200) {
-        alert("User created successfully!");
+        toast.success("User created successfully", {
+          duration: 5000,
+        });
         setFormData({
           display_name: "",
           email: "",
@@ -41,7 +46,7 @@ const CreateUserForm = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white relative">
       <div className="max-w-md w-full p-6 bg-white shadow-lg rounded-lg">
         <h2 className="text-xl font-semibold mb-4 text-black">Add Resident To System</h2>
         <form onSubmit={handleSubmit}>
@@ -52,7 +57,7 @@ const CreateUserForm = () => {
             <input
               type="text"
               id="display_name"
-              name="display_name" // Match with the formData key
+              name="display_name"
               value={formData.display_name}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-black"
@@ -67,7 +72,7 @@ const CreateUserForm = () => {
             <input
               type="email"
               id="email"
-              name="email" // Match with the formData key
+              name="email"
               value={formData.email}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black sm:text-sm"
@@ -87,6 +92,17 @@ const CreateUserForm = () => {
             Create User
           </button>
         </form>
+      </div>
+      <br />
+
+      {/* Button for Managing Users */}
+      <div className="mt-6"> {/* Added margin-top here */}
+        <button
+          onClick={() => router.push("/admin/view-users")}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600"
+        >
+          Go To Manage Users
+        </button>
       </div>
     </div>
   );

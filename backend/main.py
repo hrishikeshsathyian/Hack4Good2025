@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from supabase import supabase
+from supabase_setup import supabase
 from firebase_setup import admin_auth
 from interfaces import CreateUserBody
 from fastapi.middleware.cors import CORSMiddleware

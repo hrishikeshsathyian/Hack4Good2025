@@ -1,23 +1,33 @@
 "use client";
 
 import Image from "next/image";
-import { signInWithPopup, signOut } from "firebase/auth";
+import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../../lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { GoogleAuthProvider } from "firebase/auth/web-extension";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function Home() {
-  const { user, loading } = useAuth();
+  const router = useRouter();
+  const { loading } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
   const handleSignIn = async () => {
     signInWithPopup(auth, provider)
       .then((result) => {
         GoogleAuthProvider.credentialFromResult(result);
+        toast.success("Sign-in successful", {
+          duration: 5000,
+        });
+        router.push("/admin/add-users");
       })
       .catch((error) => {
         console.error("Sign-in error:", error);
+        toast.error("Oops! Sign-in failed :( Please try again.", {
+          duration: 5000,
+        });
         setError(error.message);
       });
   };
@@ -58,7 +68,7 @@ export default function Home() {
         style={{ color: "#1f3d77" }}
         onClick={handleSignIn}
       >
-        Login
+        {loading ? "Loading..." : "Login with Google"}
       </button>
 
       {/* Footer Section */}

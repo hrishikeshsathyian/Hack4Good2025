@@ -31,6 +31,7 @@ async def ping():
 async def create_user(body: CreateUserBody):
     try:
      admin_auth.create_user(display_name=body.display_name, email=body.email)
+     # add supabase create user
      return {"message": f"User {body.display_name} created successfully"}
     except Exception as e:
         return {"message": str(e)}

@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from supabase import supabase
 from firebase_setup import admin_auth
 from interfaces import CreateUserBody
 from fastapi.middleware.cors import CORSMiddleware
@@ -60,3 +61,7 @@ async def get_users():
         user_list.append(user_obj)
 
     return user_list
+
+@app.get("/test")
+async def test():
+   return supabase.from_("users").select("*").execute()

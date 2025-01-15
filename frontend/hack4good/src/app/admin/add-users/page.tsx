@@ -1,9 +1,10 @@
-'use client';
+"use client";
+
 import axiosInstance from "@/utils/axiosInstance";
 import { createUserBody } from "@/utils/interfaces";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowLeftIcon } from '@heroicons/react/20/solid';
+import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import toast from "react-hot-toast";
 
 const CreateUserForm = () => {
@@ -17,7 +18,9 @@ const CreateUserForm = () => {
     date_of_birth: new Date(),
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -54,14 +57,23 @@ const CreateUserForm = () => {
     }
   };
 
-  const isSubmitDisabled = !formData.display_name || !formData.email || !formData.phone_number || !formData.age;
+  const isSubmitDisabled =
+    !formData.display_name ||
+    !formData.email ||
+    !formData.phone_number ||
+    !formData.age;
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white relative">
       <div className="max-w-md w-full p-6 bg-white shadow-lg rounded-lg">
-        <h2 className="text-xl font-semibold mb-4 text-black">Add Resident To System</h2>
+        <h2 className="text-xl font-semibold mb-4 text-black">
+          Add Resident To System
+        </h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="display_name" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="display_name"
+              className="block text-sm font-medium text-gray-700"
+            >
               Display Name
             </label>
             <input
@@ -76,7 +88,10 @@ const CreateUserForm = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
               Email
             </label>
             <input
@@ -91,7 +106,10 @@ const CreateUserForm = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="phone_number" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="phone_number"
+              className="block text-sm font-medium text-gray-700"
+            >
               Phone Number
             </label>
             <input
@@ -106,7 +124,10 @@ const CreateUserForm = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="age" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="age"
+              className="block text-sm font-medium text-gray-700"
+            >
               Age
             </label>
             <input
@@ -118,25 +139,33 @@ const CreateUserForm = () => {
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-black"
               required
             />
-            </div>
+          </div>
 
-            <div className="mb-4">
-            <label htmlFor="date_of_birth" className="block text-sm font-medium text-gray-700">
+          <div className="mb-4">
+            <label
+              htmlFor="date_of_birth"
+              className="block text-sm font-medium text-gray-700"
+            >
               Date Of Birth
             </label>
             <input
               type="date"
               id="date_of_birth"
               name="date_of_birth"
-              value={new Date(formData.date_of_birth).toISOString().split('T')[0]}
+              value={
+                new Date(formData.date_of_birth).toISOString().split("T")[0]
+              }
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-black"
               required
             />
-            </div>
+          </div>
 
           <div className="mb-4">
-            <label htmlFor="voucher_points" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="voucher_points"
+              className="block text-sm font-medium text-gray-700"
+            >
               Voucher Points
             </label>
             <input

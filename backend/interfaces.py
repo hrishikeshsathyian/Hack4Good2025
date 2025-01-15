@@ -1,3 +1,4 @@
+import uuid
 from datetime import date
 from pydantic import BaseModel
 
@@ -15,3 +16,15 @@ class UpdateInventoryBody(BaseModel):
     description: str
     qty: int
     price: int
+
+class TransactionOutflow(BaseModel):
+    id: uuid.UUID
+    amount: int
+    recipient_id: uuid.UUID
+    product_id: str
+    qty: int
+    price: int
+    date: date
+
+class UUIDBody(BaseModel):
+    uuid: str

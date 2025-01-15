@@ -22,3 +22,12 @@ export interface firebaseUser {
   email: string;
   uid: string;
 }
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  description: string;
+  qty: number;
+  price: number;
+  category: string;
+}

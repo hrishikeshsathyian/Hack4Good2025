@@ -51,10 +51,10 @@ export default function AdminDashboard() {
             Onboard User
           </button>
           <button
-
+            onClick={() => router.push("/admin/manage-inventory")}
             className="flex items-center justify-center w-64 h-40 bg-grey text-black text-lg font-semibold rounded-lg shadow-md hover:bg-gray-800 transition"
           >
-            Generate Report
+            Manage Inventory
           </button>
           <button
             

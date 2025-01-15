@@ -80,3 +80,7 @@ async def get_users():
 @app.get("/test")
 async def test():
    return supabase.from_("users").select("*").execute()
+
+@app.get("/transactions")
+async def get_transactions():
+    return supabase.from_("voucher_outflow").select("*").execute()

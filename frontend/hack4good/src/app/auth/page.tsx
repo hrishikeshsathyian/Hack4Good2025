@@ -64,7 +64,7 @@ export default function Home() {
 
       {/* Login Button */}
       <button
-        className="w-[240px] bg-white text-blue-600 font-semibold text-lg py-3 px-6 rounded-full shadow-md hover:bg-gray-200 transition duration-200"
+        className="w-[240px] bg-white font-semibold text-lg py-3 px-6 rounded-full shadow-md hover:bg-gray-200 transition duration-200"
         style={{ color: "#1f3d77" }}
         onClick={handleSignIn}
       >

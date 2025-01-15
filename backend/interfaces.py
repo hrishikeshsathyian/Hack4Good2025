@@ -8,3 +8,10 @@ class CreateUserBody(BaseModel):
     phone_number: str
     date_of_birth: date
     voucher_points: int
+
+class UpdateInventoryBody(BaseModel):
+    product_id: str
+    name: str
+    description: str
+    qty: int
+    price: int

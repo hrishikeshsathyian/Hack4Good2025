@@ -2,8 +2,9 @@ import uuid
 from fastapi import FastAPI
 from supabase_setup import supabase
 from firebase_setup import admin_auth
-from interfaces import CreateUserBody
+from interfaces import CreateUserBody, UpdateInventoryBody
 from fastapi.middleware.cors import CORSMiddleware
+import db
 
 app = FastAPI()
 
@@ -15,9 +16,6 @@ app.add_middleware(
     allow_methods=["*"],  # Allow all HTTP methods (POST, GET, OPTIONS, etc.)
     allow_headers=["*"],  # Allow all headers
 )
-
-
-
 
 
 @app.get("/")
@@ -81,6 +79,12 @@ async def get_users():
 async def test():
    return supabase.from_("users").select("*").execute()
 
-@app.get("/transactions")
-async def get_transactions():
-    return supabase.from_("voucher_outflow").select("*").execute()
+@app.get("/inventory")
+async def get_inventory():
+    result = await db.get_inventory()
+    return result
+
+@app.put("/inventory/update")
+async def update_inventory(body: UpdateInventoryBody):
+    result = await db.update_inventory(body.product_id, body.qty, body.price, body.name, body.description)
+    return result

@@ -1,3 +1,4 @@
+import uuid
 from fastapi import FastAPI
 from supabase_setup import supabase
 from firebase_setup import admin_auth
@@ -32,20 +33,34 @@ async def ping():
 async def create_user(body: CreateUserBody):
     try:
      admin_auth.create_user(display_name=body.display_name, email=body.email)
+     print(f"User {body.display_name} created firebase account successfully")
+     supabase.from_("users").insert([{
+            "display_name": body.display_name,
+            "uid": str(uuid.uuid4()),
+            "email": body.email,
+            "phone_number": body.phone_number,
+            "date_of_birth": body.date_of_birth.strftime('%Y-%m-%d'),
+            "age": body.age,
+            "role": "resident",
+        }]).execute()
+     print(f"User {body.display_name} created supabase account successfully")
      # add supabase create user
      return {"message": f"User {body.display_name} created successfully"}
     except Exception as e:
+        print(f"Error creating user {e}")
         return {"message": str(e)}
     
 @app.delete("/delete/user/{email}")
 async def delete_user(email: str):
     try:
      print(f"Deleting user {email}")
-     admin_auth.delete_user(email)
+     firebase_user = admin_auth.get_user_by_email(email)
+     admin_auth.delete_user(firebase_user.uid)
+     supabase.from_("users").delete().eq("email", email).execute()
      print(f"User {email} deleted successfully")
      return {"message": f"User {email} deleted successfully"}
     except Exception as e:
-        print(f"Error deleting user {email}")
+        print(f"Error deleting user {email}, {e}")
         return {"message": str(e)}
     
 @app.get("/get/users")

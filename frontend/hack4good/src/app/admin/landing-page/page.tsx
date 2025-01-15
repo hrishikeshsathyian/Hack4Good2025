@@ -9,6 +9,8 @@ export default function AdminDashboard() {
   const router = useRouter();
 
   const handleLogout = async () => {
+    const confirmLogout = window.confirm("Are you sure you want to log out of your account?");
+    if (!confirmLogout) return;
     try {
       await signOut(auth);
       toast.success("Logged out successfully! See you again :)", {

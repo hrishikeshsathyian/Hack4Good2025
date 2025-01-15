@@ -109,3 +109,24 @@ async def get_top_items(start_date, end_date):
         top_items_with_names.append({"name": product_name, "quantity": quantity})
 
     return top_items_with_names
+
+async def get_voucher_outflow(recipient_id: str):
+    # Get voucher outflow based on user id
+    response = supabase.from_("voucher_outflow").select("*").eq("recipient_id", recipient_id).execute()
+    return response
+
+async def get_voucher_inflow(recipient_id: str):
+    # Get voucher inflow based on user id
+    response = supabase.from_("voucher_inflow").select("*").eq("recipient_id", recipient_id).execute()
+    return response
+
+async def get_product_name(product_id: str):
+    # Get product details based on product id
+    response = supabase.from_("products").select("name").eq("id", product_id).execute()
+    return response
+
+async def get_issuer_name(issuer_id: str):
+    # Get issuer details based on issuer id
+    response = supabase.from_("users").select("display_name").eq("uid", issuer_id).execute()
+    return response
+

@@ -1,14 +1,34 @@
 "use client";
 
+import axiosInstance from "@/utils/axiosInstance";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Minimart() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [transactionHistory, setTransactionHistory] = useState<any[]>([]);
 
   const handleMenuToggle = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
+
+  const obtainTransactionHistory = async () => {
+    try {
+      const response = await axiosInstance.post(
+        "/get_transaction_history",
+        { uuid: "199df3ea-8bb4-43be-bf23-d5677582bfee" } // Pass the recipient_id as a JSON object
+      );
+      setTransactionHistory(response.data.transaction_history); // Update state
+    } catch (error) {
+      console.error("Error fetching transaction history:", error);
+      alert("An error occurred while fetching transaction history.");
+    }
+  };
+
+  // Fetch transaction history on page load
+  useEffect(() => {
+    obtainTransactionHistory();
+  }, []);
 
   // Fake transaction data (replace this with Supabase data later)
   // Note that the transaction date data is in UTC format
@@ -175,7 +195,7 @@ export default function Minimart() {
                   </tr>
                 </thead>
                 <tbody className="shadow">
-                  {fakeTransactions.map((txn) => (
+                  {transactionHistory.map((txn) => (
                     <tr
                       key={txn.id}
                       className={`${
@@ -190,11 +210,11 @@ export default function Minimart() {
                       </td>
                       {/* Issuer */}
                       <td className="px-4 py-2" style={{ color: "#424242" }}>
-                        {txn.issuer || "-"}
+                        {txn.issuer_name || "-"}
                       </td>
                       {/* Item */}
                       <td className="px-4 py-2" style={{ color: "#424242" }}>
-                        {txn.item || "-"}
+                        {txn.product_name}
                       </td>
                       {/* Quantity */}
                       <td className="px-4 py-2" style={{ color: "#424242" }}>
@@ -202,10 +222,9 @@ export default function Minimart() {
                       </td>
                       {/* Date */}
                       <td className="px-4 py-2" style={{ color: "#424242" }}>
-                        {new Date(txn.date_of_transaction).toLocaleString(
-                          "en-SG",
-                          { timeZone: "Asia/Singapore" }
-                        )}
+                        {new Date(txn.created_at).toLocaleString("en-SG", {
+                          timeZone: "Asia/Singapore",
+                        })}
                       </td>
                     </tr>
                   ))}

@@ -1,3 +1,4 @@
+import uuid
 from datetime import date
 from pydantic import BaseModel
 
@@ -24,3 +25,14 @@ class GenerateAiBody(BaseModel):
     prompt: str 
     start_date: date
     end_date: date
+class TransactionOutflow(BaseModel):
+    id: uuid.UUID
+    amount: int
+    recipient_id: uuid.UUID
+    product_id: str
+    qty: int
+    price: int
+    date: date
+
+class UUIDBody(BaseModel):
+    uuid: str

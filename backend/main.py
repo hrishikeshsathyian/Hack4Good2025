@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from supabase_setup import supabase
 from firebase_setup import admin_auth
 from interfaces import CreateUserBody, GenerateAiBody, GetBreakdownBody, UpdateInventoryBody
+from interfaces import CreateUserBody, UUIDBody, UpdateInventoryBody
 from fastapi.middleware.cors import CORSMiddleware
 import db
 
@@ -99,3 +100,63 @@ async def get_top_items(body: GetBreakdownBody):
     result = await db.get_top_items(body.start_date, body.end_date)
     return result
 
+@app.get("/get_voucher_outflow")
+async def get_voucher_outflow(body: UUIDBody):
+    result = await db.get_voucher_outflow(uuid.UUID(body.uuid))
+    return result.data
+
+@app.get("/get_voucher_inflow")
+async def get_voucher_inflow(body: UUIDBody):
+    result = await db.get_voucher_inflow(uuid.UUID(body.uuid))
+    return result.data
+
+@app.post("/get_transaction_history")
+async def get_transaction_history(body: UUIDBody):
+    try:
+        # Fetch voucher inflow
+        inflow_result = await db.get_voucher_inflow(body.uuid)
+        inflow_data = inflow_result.data if inflow_result else []
+
+        # Add transaction type to inflow
+        for record in inflow_data:
+            record["transaction_type"] = "inflow"
+            if "issuer_id" in record and record["issuer_id"]:
+                # Fetch issuer name for each issuer_id
+                issuer_name_result = await get_issuer_name(record["issuer_id"])
+                record["issuer_name"] = issuer_name_result
+            else:
+                record["issuer_name"] = "-"
+
+        # Fetch voucher outflow
+        outflow_result = await db.get_voucher_outflow(body.uuid)
+        outflow_data = outflow_result.data if outflow_result else []
+
+        # Add transaction type to outflow and fetch product names
+        for record in outflow_data:
+            record["transaction_type"] = "outflow"
+            if "product_id" in record and record["product_id"]:
+                # Fetch product name for each product_id
+                product_name_result = await get_product_name(record["product_id"])
+                record["product_name"] = product_name_result  # Replace product_id with name
+            else:
+                record["product_name"] = "-"
+
+        # Combine and sort by created_at
+        combined_data = inflow_data + outflow_data
+        sorted_data = sorted(combined_data, key=lambda x: x["created_at"], reverse=True)
+
+        return {"transaction_history": sorted_data}
+
+    except Exception as e:
+        print(f"Error fetching transaction history: {e}")
+        return {"message": str(e)}
+    
+@app.get("/get_product_name/{product_id}")
+async def get_product_name(product_id: str):
+    result = await db.get_product_name(product_id)
+    return result.data[0]["name"]
+
+@app.get("/get_issuer_name/{issuer_id}")
+async def get_issuer_name(issuer_id: str):
+    result = await db.get_issuer_name(issuer_id)
+    return result.data[0]["display_name"]

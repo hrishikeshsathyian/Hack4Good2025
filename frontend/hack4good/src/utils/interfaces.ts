@@ -31,3 +31,8 @@ export interface InventoryItem {
   price: number;
   category: string;
 }
+
+export interface TopItem {
+  name: string;
+  quantity: number;
+}

@@ -6,7 +6,7 @@ load_dotenv()
 from ai_interfaces import AiWeeklySummaryOutput
 
 
-async def generate_weekly_report():
+async def generate_weekly_report(start_date, end_date, query):
     llm = ChatOpenAI(model="gpt-4o-mini")
     transactions_for_the_week = await db.get_transactions_for_prompt()
     prompt = """ 

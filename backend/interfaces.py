@@ -17,6 +17,14 @@ class UpdateInventoryBody(BaseModel):
     qty: int
     price: int
 
+class GetBreakdownBody(BaseModel):
+    start_date: date
+    end_date: date
+
+class GenerateAiBody(BaseModel):
+    prompt: str 
+    start_date: date
+    end_date: date
 class TransactionOutflow(BaseModel):
     id: uuid.UUID
     amount: int

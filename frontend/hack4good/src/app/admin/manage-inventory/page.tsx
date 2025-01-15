@@ -11,6 +11,7 @@ const InventoryPage = () => {
     const [inventory, setInventory] = useState<InventoryItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
+    const [showLowStock, setShowLowStock] = useState(false);
 
     useEffect(() => {
         async function fetchInventory() {
@@ -35,9 +36,21 @@ const InventoryPage = () => {
 
     const [selectedCategory, setSelectedCategory] = useState('All');
     const categories = ['All', ...new Set(inventory.map(item => item.category))];
-    const filteredInventory = selectedCategory === 'All'
-        ? inventory
-        : inventory.filter(item => item.category === selectedCategory);
+    const filteredInventory = inventory.filter(item => {
+        // if (showLowStock) {
+        //     return item.qty < 5; // Filter items with quantity < 5
+        // }
+        if (selectedCategory !== 'All' && showLowStock) {
+            return item.category === selectedCategory && item.qty < 5; // Filter by selected category
+        }
+        if (selectedCategory !== 'All' && !showLowStock) {
+            return item.category === selectedCategory; // Filter by selected category
+        }
+        if (selectedCategory == 'All' && showLowStock) {
+            return item.qty < 5; // Filter by selected category
+        }
+        return true; // Show all items if no filters are applied
+    });
 
     const handleEditClick = (item: InventoryItem) => {
         setEditingItem({ ...item });
@@ -93,6 +106,13 @@ const InventoryPage = () => {
                         </option>
                     ))}
                 </select>
+
+                <button
+                    onClick={() => setShowLowStock(!showLowStock)}
+                    className={!showLowStock ? "ml-4 bg-red-500 text-white py-1 px-3 rounded hover:bg-red-700 focus:outline-none" : "ml-4 bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-700 focus:outline-none" }
+                >
+                    {showLowStock ? 'Show All Items' : 'Show Low Stock Items'}
+                </button>
             </div>
 
             {/* Inventory Table */}

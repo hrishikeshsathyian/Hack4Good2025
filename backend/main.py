@@ -2,7 +2,7 @@ import uuid
 from fastapi import FastAPI
 from supabase_setup import supabase
 from firebase_setup import admin_auth
-from interfaces import CreateUserBody, UpdateInventoryBody
+from interfaces import CreateUserBody, GenerateAiBody, GetBreakdownBody, UpdateInventoryBody
 from fastapi.middleware.cors import CORSMiddleware
 import db
 
@@ -88,3 +88,14 @@ async def get_inventory():
 async def update_inventory(body: UpdateInventoryBody):
     result = await db.update_inventory(body.product_id, body.qty, body.price, body.name, body.description)
     return result
+
+@app.post("/breakdown")
+async def get_breakdown(body: GetBreakdownBody):
+    result = await db.get_breakdown(body.start_date, body.end_date)
+    return result
+
+@app.post("/top_items")
+async def get_top_items(body: GetBreakdownBody):
+    result = await db.get_top_items(body.start_date, body.end_date)
+    return result
+

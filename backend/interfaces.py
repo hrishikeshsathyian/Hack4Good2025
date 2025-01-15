@@ -15,3 +15,12 @@ class UpdateInventoryBody(BaseModel):
     description: str
     qty: int
     price: int
+
+class GetBreakdownBody(BaseModel):
+    start_date: date
+    end_date: date
+
+class GenerateAiBody(BaseModel):
+    prompt: str 
+    start_date: date
+    end_date: date

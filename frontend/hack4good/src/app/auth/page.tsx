@@ -21,7 +21,7 @@ export default function Home() {
         toast.success("Sign-in successful", {
           duration: 5000,
         });
-        router.push("/admin/add-users");
+        router.push("/admin/landing-page");
       })
       .catch((error) => {
         console.error("Sign-in error:", error);

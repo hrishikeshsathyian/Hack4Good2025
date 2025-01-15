@@ -3,6 +3,7 @@ import axiosInstance from "@/utils/axiosInstance";
 import { createUserBody } from "@/utils/interfaces";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ArrowLeftIcon } from '@heroicons/react/20/solid';
 import toast from "react-hot-toast";
 
 const CreateUserForm = () => {
@@ -10,9 +11,10 @@ const CreateUserForm = () => {
   const [formData, setFormData] = useState<createUserBody>({
     display_name: "",
     email: "",
-    number: "",
-    age: "",
-    voucher_points: "",
+    phone_number: "",
+    age: 0,
+    voucher_points: 50,
+    date_of_birth: new Date(),
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -27,6 +29,9 @@ const CreateUserForm = () => {
     e.preventDefault();
 
     try {
+      console.log("Form data:", formData);
+      formData.voucher_points = Number(formData.voucher_points);
+      formData.age = Number(formData.age);
       const response = await axiosInstance.post("/create/user", formData);
       if (response.status === 200) {
         toast.success("User created successfully", {
@@ -35,9 +40,10 @@ const CreateUserForm = () => {
         setFormData({
           display_name: "",
           email: "",
-          number: "",
-          age: "",
-          voucher_points: "",
+          phone_number: "",
+          age: 0,
+          voucher_points: 50,
+          date_of_birth: new Date(),
         });
       } else {
         alert("Failed to create user. Please try again.");
@@ -48,6 +54,7 @@ const CreateUserForm = () => {
     }
   };
 
+  const isSubmitDisabled = !formData.display_name || !formData.email || !formData.phone_number || !formData.age;
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white relative">
       <div className="max-w-md w-full p-6 bg-white shadow-lg rounded-lg">
@@ -84,14 +91,14 @@ const CreateUserForm = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="number" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="phone_number" className="block text-sm font-medium text-gray-700">
               Phone Number
             </label>
             <input
               type="text"
-              id="number"
-              name="number"
-              value={formData.number}
+              id="phone_number"
+              name="phone_number"
+              value={formData.phone_number}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-black"
               required
@@ -111,7 +118,22 @@ const CreateUserForm = () => {
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-black"
               required
             />
-          </div>
+            </div>
+
+            <div className="mb-4">
+            <label htmlFor="date_of_birth" className="block text-sm font-medium text-gray-700">
+              Date Of Birth
+            </label>
+            <input
+              type="date"
+              id="date_of_birth"
+              name="date_of_birth"
+              value={new Date(formData.date_of_birth).toISOString().split('T')[0]}
+              onChange={handleChange}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-black"
+              required
+            />
+            </div>
 
           <div className="mb-4">
             <label htmlFor="voucher_points" className="block text-sm font-medium text-gray-700">
@@ -128,10 +150,10 @@ const CreateUserForm = () => {
           </div>
 
           <button
-            disabled={!formData.display_name || !formData.email || !formData.number || !formData.age}
+            disabled={isSubmitDisabled}
             type="submit"
             className={`w-full py-2 px-4 rounded-md shadow focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-              !formData.display_name || !formData.email || !formData.number || !formData.age
+              isSubmitDisabled
                 ? "bg-gray-400 text-gray-700 cursor-not-allowed"
                 : "bg-blue-500 text-white hover:bg-blue-600 focus:ring-blue-500"
             }`}
@@ -140,14 +162,13 @@ const CreateUserForm = () => {
           </button>
         </form>
       </div>
-      <br />
-
       <div className="mt-6">
         <button
-          onClick={() => router.push("/admin/view-users")}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600"
+          onClick={() => router.push("/admin/landing-page")}
+          className="flex items-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
         >
-          Go To Manage Users
+          <ArrowLeftIcon className="h-5 w-5 mr-2" />
+          Back To Landing Page
         </button>
       </div>
     </div>

@@ -37,3 +37,11 @@ class TransactionOutflow(BaseModel):
 
 class UUIDBody(BaseModel):
     uuid: str
+
+
+class addItemBody(BaseModel):
+    name: str
+    description: str
+    qty: int
+    price: int
+    category: str

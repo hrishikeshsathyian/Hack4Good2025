@@ -137,3 +137,7 @@ async def get_current_inventory():
     response = supabase.from_("products").select("*").execute()
     return response.data
 
+async def add_item(name, description, quantity, price, category):
+    # Add item to inventory
+    response = supabase.from_("products").insert([{"name": name,"description": description, "qty": quantity, "price": price, "category": category }]).execute()
+    return response

@@ -3,7 +3,7 @@ from fastapi import FastAPI
 import ai
 from supabase_setup import supabase
 from firebase_setup import admin_auth
-from interfaces import CreateUserBody, GenerateAiBody, GetBreakdownBody, UpdateInventoryBody
+from interfaces import CreateUserBody, GenerateAiBody, GetBreakdownBody, UpdateInventoryBody, addItemBody
 from interfaces import CreateUserBody, UUIDBody, UpdateInventoryBody
 from fastapi.middleware.cors import CORSMiddleware
 import db
@@ -210,4 +210,14 @@ async def get_pending_items(email: str):
 
     except Exception as e:
         print(f"Error fetching pending items: {e}")
+        return {"message": str(e)}
+
+@app.post("/inventory/add")
+async def add_item(body: addItemBody):
+    try:
+        # Update the item status
+        response = await db.add_item(body.name, body.description, body.qty, body.price, body.category)
+        return response
+    except Exception as e:
+        print(f"Error adding item: {e}")
         return {"message": str(e)}

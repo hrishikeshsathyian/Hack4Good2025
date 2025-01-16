@@ -45,3 +45,14 @@ class addItemBody(BaseModel):
     qty: int
     price: int
     category: str
+
+class UpdateStatusBody(BaseModel):
+    product_id: str
+    quantity: int
+
+class Transaction(BaseModel):
+    user_name: str 
+    status: str
+    acquired_at: date 
+    product_name: str
+    price: int

@@ -28,7 +28,7 @@ export default function UsersPage() {
   }, []);
 
   // Delete user by email
-  async function handleDelete(email:string) {
+  async function handleDelete(email: string) {
     const confirmDelete = window.confirm("Are you sure you want to delete this user?");
     if (!confirmDelete) return;
     try {
@@ -37,8 +37,8 @@ export default function UsersPage() {
       if (response.status === 200) {
         setUsers(users.filter(user => user.email !== email));
         toast.success('User deleted successfully', {
-            duration: 5000, 
-          });
+          duration: 5000,
+        });
       } else {
         console.error('Failed to delete user');
       }
@@ -49,20 +49,23 @@ export default function UsersPage() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6 relative">
-      {/* Back Button */}
-      <button
-        onClick={() => router.back()}
-        className="flex items-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
-      >
-        <ArrowLeftIcon className="h-5 w-5 mr-2" />
-        Back
-      </button>
+      {/* Top Bar with Back and Add User Buttons */}
+      <div className="flex justify-end items-center mb-6">
+
+        <button
+          onClick={() => router.push('/admin/add-users')}
+          className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700"
+        >
+          Add User
+        </button>
+      </div>
 
       {/* Page Heading */}
       <div className="flex justify-center items-center pt-30">
         <h1 className="text-2xl font-bold mb-4 text-black">User Management</h1>
       </div>
 
+      {/* User List */}
       <div className="bg-white rounded shadow-md p-4">
         {loading ? (
           <p className='text-blue-500'>Loading users...</p>
@@ -92,14 +95,16 @@ export default function UsersPage() {
           </div>
         )}
       </div>
+
+      {/* Back to Landing Page Button */}
       <div className="mt-6 flex justify-center">
         {!loading && (
           <button
-        onClick={() => router.push("/admin/landing-page")}
-        className="flex items-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
+            onClick={() => router.push("/admin/landing-page")}
+            className="flex items-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
           >
-        <ArrowLeftIcon className="h-5 w-5 mr-2" />
-        Back To Landing Page
+            <ArrowLeftIcon className="h-5 w-5 mr-2" />
+            Back To Landing Page
           </button>
         )}
       </div>

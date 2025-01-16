@@ -149,3 +149,28 @@ async def get_product_name(product_id: str):
 async def get_issuer_name(issuer_id: str):
     result = await db.get_issuer_name(issuer_id)
     return result.data[0]["display_name"]
+
+@app.get("/get_all_products")
+async def get_all_products():
+    result = await db.get_all_products()
+
+    if not result.data:
+        return {"error": "Failed to fetch products"}
+
+    products_with_images = []
+    for product in result.data:
+        image_path = product.get("image_path")
+        if image_path:
+            public_url = supabase.storage.from_('image').get_public_url(image_path)
+            product["image_url"] = public_url
+        else:
+            product["image_url"] = None
+
+        products_with_images.append(product)
+
+    return products_with_images
+
+@app.get("/get_filtered_products/{filter}")
+async def get_filtered_products(filter: str):
+    result = await db.get_filtered_products(filter)
+    return result.data

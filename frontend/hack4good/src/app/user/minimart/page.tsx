@@ -1,15 +1,60 @@
 "use client";
 
+import axiosInstance from "@/utils/axiosInstance";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Minimart() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null); // Store selected product details
+  const [productList, setProductList] = useState<any[]>([]); // Store product list
 
   const handleMenuToggle = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
+
+  const openModal = (product) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedProduct(null);
+  };
+
+  const getAllProducts = async () => {
+    try {
+      const response = await axiosInstance.get("/get_all_products");
+      setProductList(response.data); // Update state
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      alert("An error occurred while fetching products.");
+    }
+  };
+
+  const getFilteredProducts = async (filter: string) => {
+    try {
+      const response = await axiosInstance.get(
+        `/get_filtered_products/${filter}`
+      );
+      setProductList(response.data); // Update state
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      alert("An error occurred while fetching products.");
+    }
+  };
+
+  const filterProducts = (category: string) => () => {
+    getFilteredProducts(category);
+    setIsCategoriesOpen(false);
+  };
+
+  useEffect(() => {
+    getAllProducts();
+  }, []);
 
   return (
     <div className="flex min-h-screen">
@@ -27,11 +72,11 @@ export default function Minimart() {
             Categories
           </h2>
           <ul className="space-y-2">
-            {["Bags", "Watches", "Games"].map((category, index) => (
+            {["Electronics", "Food", "Clothings"].map((category, index) => (
               <li
                 key={index}
                 className="py-2 border-b border-gray-300 text-gray-700 hover:text-blue-600 cursor-pointer transition-all duration-300 ease-in-out"
-                onClick={() => alert(`You clicked on ${category}`)}
+                onClick={filterProducts(category)}
               >
                 {category}
               </li>
@@ -100,12 +145,11 @@ export default function Minimart() {
 
         {/* Mobile Menu Dropdown */}
         <div
-          className={`absolute top-[4.5rem] left-100 w-full bg-white z-50 shadow-lg transform transition-all duration-300 ${
+          className={`absolute top-[4.5rem] left-200 w-full bg-white z-50 shadow-lg transform transition-all duration-300 ${
             isMobileMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
           } overflow-hidden`}
-          style={{ color: "#424242" }}
         >
-          <ul className="space-y-2 p-4">
+          <ul className="space-y-2 p-4 text-gray-700">
             <li>
               <a href="home" className="hover:underline">
                 Home
@@ -133,22 +177,30 @@ export default function Minimart() {
         <div className="flex-1 overflow-y-scroll px-6 py-4 bg-gray-200">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {/* Render Product Boxes */}
-            {[...Array(12)].map((_, index) => (
+            {productList.map((product) => (
               <div
-                key={index}
-                className="bg-gray-300 h-40 shadow-md flex flex-col justify-between transform transition-transform duration-300 hover:scale-105"
+                key={product.id}
+                className="bg-gray-300 h-40 shadow-md flex flex-col justify-between transform transition-transform duration-300 hover:scale-105 cursor-pointer"
+                onClick={() => openModal(product)}
               >
-                <div className="p-2">
+                <div className="flex justify-center w-100 h-100">
                   <Image
-                    src="/path-to-product-image.png"
-                    alt={`Product ${index + 1}`}
+                    src={product.image_url ?? "/no_image.png"}
+                    alt={product.name}
                     width={100}
                     height={100}
+                    style={{
+                      objectFit: "cover",
+                      height: "100%",
+                    }}
                   />
                 </div>
-                <div className="bg-white w-full h-10 border-t-2 flex items-center justify-center">
-                  <span className="text-sm font-medium">
-                    Product {index + 1}
+                <div className="bg-white w-full h-10 border-t-2 flex items-center justify-center space-x-2">
+                  <span className="text-sm text-gray-700 font-medium">
+                    {product.name}
+                  </span>
+                  <span className="text-sm text-blue-700 font-medium">
+                    {product.price.toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -156,6 +208,62 @@ export default function Minimart() {
           </div>
         </div>
       </div>
+
+      {/* Modal */}
+      {isModalOpen && selectedProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg w-[600px] relative">
+            {/* Close Button */}
+            <button
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
+              onClick={closeModal}
+            >
+              &times;
+            </button>
+
+            {/* Product Details */}
+            <h2 className="text-2xl font-bold mb-4 text-black">
+              {selectedProduct.name}
+            </h2>
+            <Image
+              src={selectedProduct.image_url ?? "/no_image.png"}
+              alt={selectedProduct.name}
+              width={300}
+              height={300}
+              className="mx-auto mb-4"
+            />
+            <p className="text-gray-700">{selectedProduct.description}</p>
+            <p className="text-lg text-blue-600 font-bold mb-4">
+              ${selectedProduct.price.toFixed(2)}
+            </p>
+            {selectedProduct.qty > 0 ? (
+              <div className="text-green-600 font-bold">
+                In Stock: {selectedProduct.qty}
+                <button
+                  className="ml-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-800"
+                  onClick={() =>
+                    alert(`Purchasing item: ${selectedProduct.name}`)
+                  }
+                >
+                  Purchase Item
+                </button>
+              </div>
+            ) : (
+              <div className="text-red-600 font-bold justify-between bg-black">
+                Out of Stock
+                <button
+                  className="ml-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-800"
+                  onClick={() =>
+                    alert(`Requesting item: ${selectedProduct.name}`)
+                  }
+                >
+                  Request Item
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

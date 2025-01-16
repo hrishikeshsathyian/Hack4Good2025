@@ -54,3 +54,13 @@ async def get_issuer_name(issuer_id: str):
     # Get issuer details based on issuer id
     response = supabase.from_("users").select("display_name").eq("uid", issuer_id).execute()
     return response
+
+async def get_all_products():
+    # Get all products
+    response = supabase.from_("products").select("*").execute()
+    return response
+
+async def get_filtered_products(filter: str):
+    # Get products based on filter
+    response = supabase.from_("products").select("*").ilike("category", f"%{filter}%").execute()
+    return response

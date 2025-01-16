@@ -31,3 +31,16 @@ export interface InventoryItem {
   price: number;
   category: string;
 }
+
+export interface TopItem {
+  name: string;
+  quantity: number;
+}
+
+export interface PendingItem {
+  id: string;
+  name: string;
+  price: number;
+  date_purchased: Date;
+  status: string;
+}

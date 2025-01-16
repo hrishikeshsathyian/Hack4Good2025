@@ -68,8 +68,8 @@ export default function Minimart() {
         >
           <ul className="space-y-2 p-4">
             <li>
-              <a href="home" className="hover:underline">
-                Home
+              <a href="pending-items" className="hover:underline">
+                Pending Items
               </a>
             </li>
             <li>

@@ -21,6 +21,7 @@ export interface firebaseUser {
   display_name: string;
   email: string;
   uid: string;
+  address: string;
 }
 
 export interface InventoryItem {

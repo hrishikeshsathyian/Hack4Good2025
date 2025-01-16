@@ -111,7 +111,7 @@ async def get_top_items(start_date, end_date):
     top_items_with_names = []
     for product_id, quantity in top_items:
         product_name_response = await get_product_name_from_id(product_id)
-        product_name = product_name_response.data[0]["name"] if product_name_response.data else "Unknown"
+        product_name = product_name_response
         top_items_with_names.append({"name": product_name, "quantity": quantity})
 
     return top_items_with_names
@@ -224,5 +224,5 @@ async def get_transactions_for_admin():
 
 async def update_voucher_request(voucher_id):
     # Update voucher request status
-    response = supabase.from_("items").update({"status": "APPROVED"}).eq("id", voucher_id).execute()
+    response = supabase.from_("items").update({"status": "REDEEMED"}).eq("id", voucher_id).execute()
     return response

@@ -13,6 +13,7 @@ class AiOutput(BaseModel):
 
 
 class AiWeeklySummaryOutput(AiOutput):
-    answer : str = Field(
-        description="Based on the query and the given data points, this is the answer that the AI has generated for the user"
+
+    high_demand_items_to_purchase : str = Field(
+        description="The list of items that we should purchase more based on the previous purchases "
     )

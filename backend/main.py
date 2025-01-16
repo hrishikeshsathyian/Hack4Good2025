@@ -1,9 +1,7 @@
 import uuid
 from fastapi import FastAPI
-import ai
 from supabase_setup import supabase
 from firebase_setup import admin_auth
-from interfaces import CreateUserBody, GenerateAiBody, GetBreakdownBody, UpdateInventoryBody, addItemBody
 from interfaces import CreateUserBody, UUIDBody, UpdateInventoryBody
 from fastapi.middleware.cors import CORSMiddleware
 import db
@@ -91,16 +89,6 @@ async def update_inventory(body: UpdateInventoryBody):
     result = await db.update_inventory(body.product_id, body.qty, body.price, body.name, body.description)
     return result
 
-@app.post("/breakdown")
-async def get_breakdown(body: GetBreakdownBody):
-    result = await db.get_breakdown(body.start_date, body.end_date)
-    return result
-
-@app.post("/top_items")
-async def get_top_items(body: GetBreakdownBody):
-    result = await db.get_top_items(body.start_date, body.end_date)
-    return result
-
 @app.get("/get_voucher_outflow")
 async def get_voucher_outflow(body: UUIDBody):
     result = await db.get_voucher_outflow(uuid.UUID(body.uuid))
@@ -162,62 +150,27 @@ async def get_issuer_name(issuer_id: str):
     result = await db.get_issuer_name(issuer_id)
     return result.data[0]["display_name"]
 
-@app.post("/generate_ai")
-async def generate_ai(body: GenerateAiBody):
-    try:
-        response = await ai.generate_weekly_report(body.start_date, body.end_date, body.query)
-        print(response)
-        return response
-    except Exception as e:
-        print(f"Error generating AI report: {e}")
-        return {"message": str(e)}
-    
-from datetime import datetime
+@app.get("/get_all_products")
+async def get_all_products():
+    result = await db.get_all_products()
 
-@app.get("/get_pending_items/{email}")
-async def get_pending_items(email: str):
-    try:
-        # Fetch the user details
-        user_response = supabase.from_("users").select("*").eq("email", email).execute()
-        user = user_response.data[0]
-        user_id = user["uid"]
+    if not result.data:
+        return {"error": "Failed to fetch products"}
 
-        # Fetch the items for the user
-        response = supabase.from_("items").select("*").eq("user_id", user_id).execute()
-        items = response.data
+    products_with_images = []
+    for product in result.data:
+        image_path = product.get("image_path")
+        if image_path:
+            public_url = supabase.storage.from_('image').get_public_url(image_path)
+            product["image_url"] = public_url
+        else:
+            product["image_url"] = None
 
-        # Replace product_id with product_name and format acquired_at
-        updated_items = []
-        for item in items:
-            # Fetch the product name using the product_id
-            product_response = supabase.from_("products").select("name").eq("id", item["product_id"]).execute()
-            product_name = product_response.data[0]["name"] if product_response.data else "Unknown"
-            
-            # Format the acquired_at field to just the date
-            acquired_date = datetime.fromisoformat(item["acquired_at"]).date().isoformat()
-            price = await db.get_product_price_from_id(item["product_id"])
-            # Update the item with the new fields
-            updated_item = {
-                "id": item["id"],
-                "name": product_name,
-                "price": price,
-                "date_purchased": acquired_date,
-                "status": item["status"]
-            }
-            updated_items.append(updated_item)
+        products_with_images.append(product)
 
-        return updated_items
+    return products_with_images
 
-    except Exception as e:
-        print(f"Error fetching pending items: {e}")
-        return {"message": str(e)}
-
-@app.post("/inventory/add")
-async def add_item(body: addItemBody):
-    try:
-        # Update the item status
-        response = await db.add_item(body.name, body.description, body.qty, body.price, body.category)
-        return response
-    except Exception as e:
-        print(f"Error adding item: {e}")
-        return {"message": str(e)}
+@app.get("/get_filtered_products/{filter}")
+async def get_filtered_products(filter: str):
+    result = await db.get_filtered_products(filter)
+    return result.data

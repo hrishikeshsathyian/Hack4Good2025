@@ -1,18 +1,32 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
-from prompts import GENERATE_SUMMARY_PROMPT
 import db as db
 load_dotenv()   
 from ai_interfaces import AiWeeklySummaryOutput
 
 
-async def generate_weekly_report(start_date, end_date, query):
+async def generate_weekly_report():
     llm = ChatOpenAI(model="gpt-4o-mini")
-    transactions_for_the_week = await db.get_transactions_for_prompt(start_date=start_date, end_date=end_date)
-    current_inventory = await db.get_current_inventory()
-    prompt = GENERATE_SUMMARY_PROMPT
-    prompt = prompt.format(transaction_history=transactions_for_the_week, current_inventory=current_inventory, query=query) 
-    print("Works so far")
+    transactions_for_the_week = await db.get_transactions_for_prompt()
+    prompt = """ 
+    You are a AI meant to help a welfare home. Residents can spend their voucher points to purchase items from
+    the welfare home. You are tasked to generate a weekly summary of the items that are in high demand and should be purchased more. Here are the transactions for the week:
+    {transactions_for_the_week}
+
+    In each transactions, you should be able to see the amount spent on the item and the name of the item. 
+
+    Your response should STRICTLY be in the format: 
+        class AiWeeklySummaryOutput(AiOutput):
+            high_demand_items_to_purchase : str = Field(
+                description="The list of items that we should purchase more based on the previous purchases "
+            )
+
+    """
+    prompt = prompt.format(transactions_for_the_week=transactions_for_the_week)
     parsed_response : AiWeeklySummaryOutput = llm.with_structured_output(AiWeeklySummaryOutput).invoke(prompt)
-    return parsed_response.answer
+    print(parsed_response)
+
+import asyncio
+
+asyncio.run(generate_weekly_report())

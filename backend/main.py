@@ -3,7 +3,7 @@ from fastapi import FastAPI
 import ai
 from supabase_setup import supabase
 from firebase_setup import admin_auth
-from interfaces import CreateUserBody, GenerateAiBody, GetBreakdownBody, UpdateInventoryBody, addItemBody
+from interfaces import CreateUserBody, GenerateAiBody, GetBreakdownBody, UpdateInventoryBody, UpdateStatusBody, addItemBody
 from interfaces import CreateUserBody, UUIDBody, UpdateInventoryBody
 from fastapi.middleware.cors import CORSMiddleware
 import db
@@ -220,4 +220,31 @@ async def add_item(body: addItemBody):
         return response
     except Exception as e:
         print(f"Error adding item: {e}")
+        return {"message": str(e)}
+    
+@app.post("/status/update")
+async def update_inventory(body: UpdateStatusBody):
+    try:
+        response = await db.update_item_status(body.product_id, body.quantity)
+        return response
+    except Exception as e:
+        print(f"Error updating inventory: {e}")
+        return {"message": str(e)}
+    
+@app.get("/voucher_requests")
+async def get_voucher_requests():
+    try:
+        response = await db.get_transactions_for_admin()
+        return response
+    except Exception as e:
+        print(f"Error fetching voucher requests: {e}")
+        return {"message": str(e)}
+    
+@app.post("/voucher_requests/approve/{transaction_id}")
+async def approve_voucher_request(transaction_id: str):
+    try:
+        response = await db.update_voucher_request(transaction_id)
+        return response
+    except Exception as e:
+        print(f"Error approving voucher request: {e}")
         return {"message": str(e)}

@@ -193,11 +193,11 @@ const CreateUserForm = () => {
       </div>
       <div className="mt-6">
         <button
-          onClick={() => router.push("/admin/landing-page")}
+          onClick={() => router.push("/admin/view-users")}
           className="flex items-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
         >
           <ArrowLeftIcon className="h-5 w-5 mr-2" />
-          Back To Landing Page
+          Back To Manage Users
         </button>
       </div>
     </div>

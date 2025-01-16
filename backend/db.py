@@ -1,8 +1,12 @@
 from supabase_setup import supabase
 
+async def get_user_name_from_id(user_id):
+    user_name = supabase.from_("users").select("display_name").eq("uid", user_id).execute()
+    return user_name.data[0]["display_name"]
+
 async def get_product_name_from_id(product_id):
     product_name = supabase.from_("products").select("name").eq("id", product_id).execute()
-    return product_name
+    return product_name.data[0]["name"]
 
 async def get_product_category_from_id(product_id):
     product_category = supabase.from_("products").select("category").eq("id", product_id).execute()
@@ -140,4 +144,75 @@ async def get_current_inventory():
 async def add_item(name, description, quantity, price, category):
     # Add item to inventory
     response = supabase.from_("products").insert([{"name": name,"description": description, "qty": quantity, "price": price, "category": category }]).execute()
+    return response
+
+async def update_item_status(product_id, quantity):
+    """
+    Update the status of items from 'RESTOCK' to 'READY', ensuring the quantity excludes already 'READY' items.
+
+    Args:
+        product_id (int): The product ID for which to update the items.
+        quantity (int): The desired number of items to set to 'READY'.
+
+    Returns:
+        response: The response from the Supabase query.
+    """
+    # Count how many items are already 'READY'
+    ready_count_response = (
+        supabase.from_("items")
+        .select("id", count="exact")  # Count the exact number of items
+        .eq("product_id", product_id)
+        .eq("status", "READY")
+        .execute()
+    )
+    
+    
+    ready_count = ready_count_response.count
+
+    # Calculate the remaining quantity to update
+    remaining_quantity = max(quantity - ready_count, 0)
+
+    if remaining_quantity == 0:
+        return {"message": "No items need to be updated"}
+
+    # Fetch IDs of the items with status 'RESTOCK' to limit the update
+    restock_items_response = (
+        supabase.from_("items")
+        .select("id")  # Only fetch the IDs
+        .eq("product_id", product_id)
+        .eq("status", "RESTOCK")
+        .limit(remaining_quantity)  # Limit the selection to the remaining quantity
+        .execute()
+    )
+
+
+    restock_item_ids = [item["id"] for item in restock_items_response.data]
+
+    if not restock_item_ids:
+        return {"message": "No 'RESTOCK' items available to update"}
+
+    # Update the fetched items by their IDs
+    update_response = (
+        supabase.from_("items")
+        .update({"status": "READY"})
+        .in_("id", restock_item_ids)  # Update only the selected IDs
+        .execute()
+    )
+    
+    return update_response
+
+
+async def get_transactions_for_admin():
+    # Fetch all transactions for admin view
+    response = supabase.from_("items").select("*").execute()
+    data = response.data
+    for d in data:
+        d["product_name"] = await get_product_name_from_id(d["product_id"])
+        d["user_name"] = await get_user_name_from_id(d["user_id"])
+        d["price"] = await get_product_price_from_id(d["product_id"])
+    return data
+
+async def update_voucher_request(voucher_id):
+    # Update voucher request status
+    response = supabase.from_("items").update({"status": "APPROVED"}).eq("id", voucher_id).execute()
     return response

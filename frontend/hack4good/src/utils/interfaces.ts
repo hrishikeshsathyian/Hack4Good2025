@@ -44,3 +44,12 @@ export interface PendingItem {
   date_purchased: Date;
   status: string;
 }
+
+export interface Transaction {
+  id: string;
+  user_name: string;
+  status: string;
+  acquired_at: Date;
+  product_name: string;
+  price: number;
+}

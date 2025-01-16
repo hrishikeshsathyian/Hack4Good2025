@@ -79,8 +79,15 @@ const InventoryPage = () => {
                     qty: Number(editingItem.qty),
                     price: Number(editingItem.price),
                 };
+                const updateInventoryBody = {
+                    product_id : editingItem.id,
+                    quantity : Number(editingItem.qty)
+                }
                 const response = await axiosInstance.put(`/inventory/update`, body);
                 if (response.status === 200) {
+                    // update all users who are waiting for it to be restocked to be ready !
+                    const updateResponse = await axiosInstance.post('/status/update', updateInventoryBody);
+                    console.log(updateResponse);
                     setInventory(inventory.map(item => item.id === editingItem.id ? editingItem : item));
                     setEditingItem(null);
                     toast.success('Item updated successfully', {

@@ -22,9 +22,10 @@ class GetBreakdownBody(BaseModel):
     end_date: date
 
 class GenerateAiBody(BaseModel):
-    prompt: str 
+    query: str 
     start_date: date
     end_date: date
+
 class TransactionOutflow(BaseModel):
     id: uuid.UUID
     amount: int

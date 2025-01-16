@@ -11,6 +11,7 @@ export default function GenerateReport() {
   const [reportGenerated, setReportGenerated] = useState(false);
   const [userQuestion, setUserQuestion] = useState("");
   const [aiResponse, setAiResponse] = useState(""); // Placeholder for AI response
+  const [isAiLoading, setIsAiLoading] = useState(false);
 
   interface ReportData {
     [key: string]: {
@@ -65,9 +66,17 @@ export default function GenerateReport() {
     setUserQuestion(event.target.value);
   };
 
-  const handleAskAi = () => {
-    // Placeholder for AI response handling
-    setAiResponse("This is where the AI's response will appear."); // Replace with actual function
+  const handleAskAi = async () => {
+    setIsAiLoading(true);
+    const body = {
+      start_date: new Date(startDate).toISOString().split("T")[0],
+      end_date: new Date(endDate).toISOString().split("T")[0],
+      query: userQuestion,
+    };
+    const response = await axiosInstance.post("/generate_ai", body);
+    const responseData = await response.data;
+    setIsAiLoading(false);
+    setAiResponse(responseData); 
   };
 
   return (
@@ -160,7 +169,8 @@ export default function GenerateReport() {
                 </button>
                 {aiResponse && (
                   <div className="bg-gray-50 p-4 rounded-md shadow">
-                    <p className="text-black-700">{aiResponse}</p>
+                    {isAiLoading && <p className="text-black-700">Loading AI Response...</p>}
+                    {!isAiLoading && <p className="text-black-700">{aiResponse}</p>}
                   </div>
                 )}
               </div>

@@ -130,3 +130,8 @@ async def get_issuer_name(issuer_id: str):
     response = supabase.from_("users").select("display_name").eq("uid", issuer_id).execute()
     return response
 
+async def get_current_inventory():
+    # Get current inventory
+    response = supabase.from_("products").select("*").execute()
+    return response.data
+

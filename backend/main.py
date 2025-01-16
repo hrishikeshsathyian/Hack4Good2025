@@ -1,5 +1,6 @@
 import uuid
 from fastapi import FastAPI
+import ai
 from supabase_setup import supabase
 from firebase_setup import admin_auth
 from interfaces import CreateUserBody, GenerateAiBody, GetBreakdownBody, UpdateInventoryBody
@@ -160,3 +161,13 @@ async def get_product_name(product_id: str):
 async def get_issuer_name(issuer_id: str):
     result = await db.get_issuer_name(issuer_id)
     return result.data[0]["display_name"]
+
+@app.post("/generate_ai")
+async def generate_ai(body: GenerateAiBody):
+    try:
+        response = await ai.generate_weekly_report(body.start_date, body.end_date, body.query)
+        print(response)
+        return response
+    except Exception as e:
+        print(f"Error generating AI report: {e}")
+        return {"message": str(e)}

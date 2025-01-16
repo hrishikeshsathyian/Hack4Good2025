@@ -171,3 +171,43 @@ async def generate_ai(body: GenerateAiBody):
     except Exception as e:
         print(f"Error generating AI report: {e}")
         return {"message": str(e)}
+    
+from datetime import datetime
+
+@app.get("/get_pending_items/{email}")
+async def get_pending_items(email: str):
+    try:
+        # Fetch the user details
+        user_response = supabase.from_("users").select("*").eq("email", email).execute()
+        user = user_response.data[0]
+        user_id = user["uid"]
+
+        # Fetch the items for the user
+        response = supabase.from_("items").select("*").eq("user_id", user_id).execute()
+        items = response.data
+
+        # Replace product_id with product_name and format acquired_at
+        updated_items = []
+        for item in items:
+            # Fetch the product name using the product_id
+            product_response = supabase.from_("products").select("name").eq("id", item["product_id"]).execute()
+            product_name = product_response.data[0]["name"] if product_response.data else "Unknown"
+            
+            # Format the acquired_at field to just the date
+            acquired_date = datetime.fromisoformat(item["acquired_at"]).date().isoformat()
+            price = await db.get_product_price_from_id(item["product_id"])
+            # Update the item with the new fields
+            updated_item = {
+                "id": item["id"],
+                "name": product_name,
+                "price": price,
+                "date_purchased": acquired_date,
+                "status": item["status"]
+            }
+            updated_items.append(updated_item)
+
+        return updated_items
+
+    except Exception as e:
+        print(f"Error fetching pending items: {e}")
+        return {"message": str(e)}

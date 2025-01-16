@@ -57,7 +57,7 @@ export default function AdminDashboard() {
             Manage Inventory
           </button>
           <button
-            onClick={() => router.push("/admin/generate-summary")}
+            
             className="flex items-center justify-center w-64 h-40 bg-grey text-black text-lg font-semibold rounded-lg shadow-md hover:bg-gray-800 transition"
           >
             Weekly Summaries

@@ -17,15 +17,6 @@ class UpdateInventoryBody(BaseModel):
     qty: int
     price: int
 
-class GetBreakdownBody(BaseModel):
-    start_date: date
-    end_date: date
-
-class GenerateAiBody(BaseModel):
-    query: str 
-    start_date: date
-    end_date: date
-
 class TransactionOutflow(BaseModel):
     id: uuid.UUID
     amount: int
@@ -37,11 +28,3 @@ class TransactionOutflow(BaseModel):
 
 class UUIDBody(BaseModel):
     uuid: str
-
-
-class addItemBody(BaseModel):
-    name: str
-    description: str
-    qty: int
-    price: int
-    category: str

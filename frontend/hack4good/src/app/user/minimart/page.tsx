@@ -2,7 +2,7 @@
 
 import axiosInstance from "@/utils/axiosInstance";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 
 export default function Minimart() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -15,7 +15,7 @@ export default function Minimart() {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const openModal = (product) => {
+  const openModal = (product: SetStateAction<null>) => {
     setSelectedProduct(product);
     setIsModalOpen(true);
   };

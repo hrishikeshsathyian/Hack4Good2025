@@ -2,11 +2,13 @@
 import axiosInstance from "@/utils/axiosInstance";
 import { Transaction } from "@/utils/interfaces";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]); // Initial data
   const [searchTerm, setSearchTerm] = useState("");
+  const [toggle,setIsToggle] = useState(false);
 
   useEffect(() => {
     async function fetchUsers() {
@@ -19,7 +21,7 @@ export default function TransactionsPage() {
       } 
     }
     fetchUsers();
-  }, []);
+  }, [toggle]);
   // Filter transactions based on the search term
   const filteredTransactions = transactions.filter((transaction) =>
     transaction.user_name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -30,7 +32,11 @@ export default function TransactionsPage() {
     // const updatedTransactions = transactions.map((transaction) => {
     const response = await axiosInstance.post('/voucher_requests/approve/' + id);
     console.log(response)
-    alert(`Transaction ID ${id} approved!`);
+    toast.success('Transaction approved successfully', {
+        duration: 5000,
+        });
+    setIsToggle(!toggle);
+    
   };
 
   return (
@@ -69,7 +75,9 @@ export default function TransactionsPage() {
                   <td className="py-2 px-4 border-b text-black">{transaction.product_name}</td>
                   <td className="py-2 px-4 border-b text-black">{new Date(transaction.acquired_at).toISOString().split("T")[0]}</td>
                   <td className="py-2 px-4 border-b text-black">{transaction.price}</td>
-                  <td className="py-2 px-4 border-b text-black">{transaction.status}</td>
+                  <td className="py-2 px-4 border-b text-black" style={{ color: transaction.status === "READY" ? "green" : transaction.status === "REDEEMED" ? "red" : "orange" }}>
+                    {transaction.status}
+                  </td>
                   <td className="py-2 px-4 border-b text-black">
                     {transaction.status === "READY" && (
                       <button

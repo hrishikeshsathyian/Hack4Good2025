@@ -227,6 +227,7 @@ const InventoryPage = () => {
                                         item.qty
                                     )}
                                 </td>
+                                
                                 <td className="py-2 px-4 border-b text-gray-600">
                                     {editingItem?.id === item.id ? (
                                         <input

@@ -163,7 +163,7 @@ export default function GenerateReport() {
                 <button
                   onClick={handleAskAi}
                   className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition"
-                  disabled={!userQuestion.trim()}
+                  disabled={!userQuestion.trim() || isAiLoading}
                 >
                   Ask AI
                 </button>

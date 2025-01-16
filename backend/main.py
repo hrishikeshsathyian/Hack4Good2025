@@ -109,7 +109,21 @@ async def get_all_products():
 @app.get("/get_filtered_products/{filter}")
 async def get_filtered_products(filter: str):
     result = await db.get_filtered_products(filter)
-    return result.data
+    if not result.data:
+        return {"error": "Failed to fetch products"}
+
+    products_with_images = []
+    for product in result.data:
+        image_path = product.get("image_path")
+        if image_path:
+            public_url = supabase.storage.from_('image').get_public_url(image_path)
+            product["image_url"] = public_url
+        else:
+            product["image_url"] = None
+
+        products_with_images.append(product)
+
+    return products_with_images
 
 @app.put("/inventory/update")
 async def update_inventory(body: UpdateInventoryBody):

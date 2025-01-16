@@ -144,6 +144,7 @@ async def get_all_products():
 async def get_filtered_products(filter: str):
     # Get products based on filter
     response = supabase.from_("products").select("*").ilike("category", f"%{filter}%").execute()
+    return response
 
 async def get_current_inventory():
     # Get current inventory

@@ -4,13 +4,12 @@ import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "../../../../lib/firebase";
 import toast from "react-hot-toast";
+import { FaArrowRight, FaUser, FaUsersGear, FaBook, FaCalendarDays } from "react-icons/fa6";
 
 export default function AdminDashboard() {
   const router = useRouter();
 
   const handleLogout = async () => {
-    const confirmLogout = window.confirm("Are you sure you want to log out of your account?");
-    if (!confirmLogout) return;
     try {
       await signOut(auth);
       toast.success("Logged out successfully! See you again :)", {
@@ -25,8 +24,8 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Header */}
-      <header className="w-full flex justify-between items-center px-8 py-4 bg-white shadow-md">
-        <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
+      <header className="w-full flex justify-between items-center px-8 py-4" style={{ backgroundColor: "#1F3D77" }}>
+        <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
         <button
           className="bg-red-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-600 transition"
           onClick={handleLogout}
@@ -37,30 +36,36 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <div className="flex-grow flex items-center justify-center">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex flex-col gap-2">
           <button
             onClick={() => router.push("/admin/view-users")}
-            className="flex items-center justify-center w-64 h-40 bg-grey text-black text-lg font-semibold rounded-lg shadow-md hover:bg-gray-800 transition"
+            className="flex items-center justify-between w-80 h-20 px-6 py-4 bg-gray-200 text-black text-lg font-semibold rounded-lg shadow-md hover:bg-[#1F3D77] hover:text-white transition group"
           >
-            Manage Users
+            <FaUsersGear className="mr-auto"/>
+            <span>Manage Users</span>
+            <FaArrowRight className="ml-auto transform transition-transform duration-300 group-hover:translate-x-2" />
           </button>
           <button
             onClick={() => router.push("/admin/add-users")}
-            className="flex items-center justify-center w-64 h-40 bg-grey text-black text-lg font-semibold rounded-lg shadow-md hover:bg-gray-800 transition"
+            className="group flex items-center justify-between w-80 h-20 px-6 py-4 bg-gray-100 text-black text-lg font-semibold rounded-lg shadow-md hover:bg-[#1F3D77] hover:text-white transition"
           >
-            Onboard User
+            <FaUser className="mr-auto"/>
+            <span>Onboard User</span>
+            <FaArrowRight className="ml-auto transform transition-transform duration-300 group-hover:translate-x-2" />
           </button>
           <button
-            onClick={() => router.push("/admin/manage-inventory")}
-            className="flex items-center justify-center w-64 h-40 bg-grey text-black text-lg font-semibold rounded-lg shadow-md hover:bg-gray-800 transition"
+            className="group flex items-center justify-between w-80 h-20 px-6 py-4 bg-gray-200 text-black text-lg font-semibold rounded-lg shadow-md hover:bg-[#1F3D77] hover:text-white transition"
           >
-            Manage Inventory
+            <FaBook className="mr-auto" />
+            <span>Generate Report</span>
+            <FaArrowRight className="ml-auto transform transition-transform duration-300 group-hover:translate-x-2" />
           </button>
           <button
-            onClick={() => router.push("/admin/generate-summary")}
-            className="flex items-center justify-center w-64 h-40 bg-grey text-black text-lg font-semibold rounded-lg shadow-md hover:bg-gray-800 transition"
+            className="group flex items-center justify-between w-80 h-20 px-6 py-4 bg-gray-100 text-black text-lg font-semibold rounded-lg shadow-md hover:bg-[#1F3D77] hover:text-white transition"
           >
-            Weekly Summaries
+            <FaCalendarDays className="mr-auto"/>
+            <span>Weekly Summaries</span>
+            <FaArrowRight className="ml-auto transform transition-transform duration-300 group-hover:translate-x-2" />
           </button>
         </div>
       </div>

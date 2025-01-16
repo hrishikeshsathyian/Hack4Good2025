@@ -22,7 +22,9 @@ async def get_transactions_for_prompt(start_date, end_date):
         transaction["recipient_name"] = recipient_name
     return transactions_dict
 
-
+async def get_product_price_from_id(product_id):
+    product_price = supabase.from_("products").select("price").eq("id", product_id).execute()
+    return product_price.data[0]["price"]
 async def get_inventory(): 
     # Fetch inventory data
     response = supabase.from_("products").select("*").execute()

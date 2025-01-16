@@ -6,8 +6,16 @@ class CreateUserBody(BaseModel):
     display_name: str 
     email: str
     age: int
+    voucher_points: int
     phone_number: str
     date_of_birth: date
+    
+
+class UpdateUserBody(BaseModel):
+    uid: str
+    display_name: str 
+    supabase_id: str
+    email: str
     voucher_points: int
 
 class UpdateInventoryBody(BaseModel):

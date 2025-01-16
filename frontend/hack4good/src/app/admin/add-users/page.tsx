@@ -32,7 +32,7 @@ const CreateUserForm = () => {
     e.preventDefault();
 
     try {
-      console.log("Form data:", formData);
+      
       formData.voucher_points = Number(formData.voucher_points);
       formData.age = Number(formData.age);
       const response = await axiosInstance.post("/create/user", formData);

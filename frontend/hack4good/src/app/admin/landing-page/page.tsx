@@ -4,12 +4,14 @@ import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "../../../../lib/firebase";
 import toast from "react-hot-toast";
-import { FaArrowRight, FaUser, FaUsersGear, FaBook, FaCalendarDays } from "react-icons/fa6";
+import { FaBook, FaCalendarDays, FaUser } from "react-icons/fa6";
 
 export default function AdminDashboard() {
   const router = useRouter();
 
   const handleLogout = async () => {
+    const confirmLogout = window.confirm("Are you sure you want to log out of your account?");
+    if (!confirmLogout) return;
     try {
       await signOut(auth);
       toast.success("Logged out successfully! See you again :)", {
@@ -36,36 +38,34 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <div className="flex-grow flex items-center justify-center">
-        <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <button
             onClick={() => router.push("/admin/view-users")}
-            className="flex items-center justify-between w-80 h-20 px-6 py-4 bg-gray-200 text-black text-lg font-semibold rounded-lg shadow-md hover:bg-[#1F3D77] hover:text-white transition group"
+            className="flex items-center justify-center w-64 h-40 bg-gray-200 text-black text-lg font-semibold rounded-lg shadow-md transition hover:bg-blue-500 hover:text-white"
           >
-            <FaUsersGear className="mr-auto"/>
-            <span>Manage Users</span>
-            <FaArrowRight className="ml-auto transform transition-transform duration-300 group-hover:translate-x-2" />
+            <FaUser className="mr-2"/>
+            Manage Users
+          </button>
+            <button
+            onClick={() => router.push("/admin/voucher-requests")}
+            className="flex items-center justify-center w-64 h-40 bg-gray-200 text-black text-lg font-semibold rounded-lg shadow-md transition hover:bg-blue-500 hover:text-white"
+            >
+            <FaBook className="mr-2" />
+            Voucher Requests
+            </button>
+          <button
+            onClick={() => router.push("/admin/manage-inventory")}
+            className="flex items-center justify-center w-64 h-40 bg-gray-200 text-black text-lg font-semibold rounded-lg shadow-md transition hover:bg-blue-500 hover:text-white"
+          >
+            <FaBook className="mr-2" />
+            Manage Inventory
           </button>
           <button
-            onClick={() => router.push("/admin/add-users")}
-            className="group flex items-center justify-between w-80 h-20 px-6 py-4 bg-gray-100 text-black text-lg font-semibold rounded-lg shadow-md hover:bg-[#1F3D77] hover:text-white transition"
+            onClick={() => router.push("/admin/generate-summary")}
+            className="flex items-center justify-center w-64 h-40 bg-gray-200 text-black text-lg font-semibold rounded-lg shadow-md transition hover:bg-blue-500 hover:text-white"
           >
-            <FaUser className="mr-auto"/>
-            <span>Onboard User</span>
-            <FaArrowRight className="ml-auto transform transition-transform duration-300 group-hover:translate-x-2" />
-          </button>
-          <button
-            className="group flex items-center justify-between w-80 h-20 px-6 py-4 bg-gray-200 text-black text-lg font-semibold rounded-lg shadow-md hover:bg-[#1F3D77] hover:text-white transition"
-          >
-            <FaBook className="mr-auto" />
-            <span>Generate Report</span>
-            <FaArrowRight className="ml-auto transform transition-transform duration-300 group-hover:translate-x-2" />
-          </button>
-          <button
-            className="group flex items-center justify-between w-80 h-20 px-6 py-4 bg-gray-100 text-black text-lg font-semibold rounded-lg shadow-md hover:bg-[#1F3D77] hover:text-white transition"
-          >
-            <FaCalendarDays className="mr-auto"/>
-            <span>Weekly Summaries</span>
-            <FaArrowRight className="ml-auto transform transition-transform duration-300 group-hover:translate-x-2" />
+            <FaCalendarDays className="mr-2"/>
+            Generate Summaries
           </button>
         </div>
       </div>

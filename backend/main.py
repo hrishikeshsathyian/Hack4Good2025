@@ -1,9 +1,9 @@
-import uuid
+import uuid 
 from fastapi import FastAPI
 import ai
 from supabase_setup import supabase
 from firebase_setup import admin_auth
-from interfaces import CreateUserBody, GenerateAiBody, GetBreakdownBody, UpdateInventoryBody, UpdateStatusBody, addItemBody
+from interfaces import CreateUserBody, GenerateAiBody, GetBreakdownBody, UpdateInventoryBody, UpdateStatusBody, UpdateUserBody, addItemBody
 from interfaces import CreateUserBody, UUIDBody, UpdateInventoryBody
 from fastapi.middleware.cors import CORSMiddleware
 import db
@@ -41,6 +41,7 @@ async def create_user(body: CreateUserBody):
             "phone_number": body.phone_number,
             "date_of_birth": body.date_of_birth.strftime('%Y-%m-%d'),
             "age": body.age,
+            "voucher_points": body.voucher_points,
             "role": "resident",
         }]).execute()
      print(f"User {body.display_name} created supabase account successfully")
@@ -68,10 +69,15 @@ async def get_users():
     user_list = []
     users = admin_auth.list_users()
     for user in users.users:
+        supabase_user = supabase.from_("users").select("*").eq("email", user.email).execute().data
+        supabase_user = supabase_user[0] if supabase_user else {}
+
         user_obj = {
             "uid": user.uid,
+            "supabase_uid": supabase_user.get("uid"),
             "email": user.email,
-            "display_name": user.display_name
+            "display_name": user.display_name,
+            "voucher_points": supabase_user.get("voucher_points", 0),
         }
         user_list.append(user_obj)
 
@@ -274,4 +280,19 @@ async def approve_voucher_request(transaction_id: str):
         return response
     except Exception as e:
         print(f"Error approving voucher request: {e}")
+        return {"message": str(e)}
+    
+@app.post("/update_user")
+async def update_user(body: UpdateUserBody):
+    try:
+        admin_auth.update_user(uid=body.uid, display_name=body.display_name, email=body.email)
+
+        # Perform the update with Supabase
+        supabase.from_("users").update({
+            "display_name": body.display_name,
+            "email": body.email,
+            "voucher_points": body.voucher_points
+        }).eq("uid", uuid.UUID(body.supabase_id)).execute()
+    except Exception as e:
+        print(f"Error updating user: {e}")
         return {"message": str(e)}

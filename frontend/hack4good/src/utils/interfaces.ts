@@ -21,7 +21,9 @@ export interface firebaseUser {
   display_name: string;
   email: string;
   uid: string;
-  address: string;
+  supabase_uid: string;
+  phone_number: string;
+  voucher_points: number;
 }
 
 export interface InventoryItem {

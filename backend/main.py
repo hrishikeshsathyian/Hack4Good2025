@@ -3,7 +3,7 @@ from fastapi import FastAPI
 import ai
 from supabase_setup import supabase
 from firebase_setup import admin_auth
-from interfaces import AddAuctionItemBody, CreateUserBody, EndAuctionItemBody, GenerateAiBody, GetBreakdownBody, UpdateInventoryBody, UpdateStatusBody, UpdateUserBody, addItemBody
+from interfaces import AddAuctionItemBody, CreateUserBody, EndAuctionItemBody, GenerateAiBody, GetBreakdownBody, TransactionBody, UpdateInventoryBody, UpdateStatusBody, UpdateUserBody, addItemBody
 from interfaces import CreateUserBody, UUIDBody, UpdateInventoryBody
 from fastapi.middleware.cors import CORSMiddleware
 import db
@@ -158,10 +158,12 @@ async def get_voucher_inflow(body: UUIDBody):
     return result.data
 
 @app.post("/get_transaction_history")
-async def get_transaction_history(body: UUIDBody):
+async def get_transaction_history(body: TransactionBody):
     try:
         # Fetch voucher inflow
-        inflow_result = await db.get_voucher_inflow(body.uuid)
+        uuid = await db.user_id_from_email(body.email)
+        uuid = str(uuid)
+        inflow_result = await db.get_voucher_inflow(uuid)
         inflow_data = inflow_result.data if inflow_result else []
 
         # Add transaction type to inflow
@@ -175,7 +177,7 @@ async def get_transaction_history(body: UUIDBody):
                 record["issuer_name"] = "-"
 
         # Fetch voucher outflow
-        outflow_result = await db.get_voucher_outflow(body.uuid)
+        outflow_result = await db.get_voucher_outflow(uuid)
         outflow_data = outflow_result.data if outflow_result else []
 
         # Add transaction type to outflow and fetch product names

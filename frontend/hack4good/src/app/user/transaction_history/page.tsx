@@ -2,14 +2,33 @@
 
 import axiosInstance from "@/utils/axiosInstance";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { signOut } from "firebase/auth";
+import { auth } from "../../../../lib/firebase";
+import toast from "react-hot-toast";
 
 export default function Minimart() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [transactionHistory, setTransactionHistory] = useState<any[]>([]);
+  const router = useRouter();
 
   const handleMenuToggle = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleLogout = async () => {
+    const confirmLogout = window.confirm("Are you sure you want to log out of your account?");
+    if (!confirmLogout) return;
+    try {
+      await signOut(auth);
+      toast.success("Logged out successfully! See you again :)", {
+        duration: 5000,
+      });
+      router.push("/auth");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
   };
 
   const obtainTransactionHistory = async () => {
@@ -81,7 +100,16 @@ export default function Minimart() {
                 ONLINE MINIMART
               </span>
             </div>
-            <span className="font-medium text-lg">0.00</span>
+            <div className="flex items-center space-x-4">
+    <span className="font-medium text-lg">0</span>
+    <button
+      onClick={handleLogout}
+      style={{ backgroundColor: "red"}}
+      className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md font-medium focus:outline-none"
+    >
+      Logout
+    </button>
+  </div>
           </div>
 
           {/* Mobile Menu Dropdown */}

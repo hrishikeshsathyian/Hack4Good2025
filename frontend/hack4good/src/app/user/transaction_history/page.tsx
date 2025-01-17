@@ -32,22 +32,26 @@ export default function Minimart() {
     }
   };
 
-  const obtainTransactionHistory = async () => {
-    try {
-      const response = await axiosInstance.post(
-        "/get_transaction_history",
-        { email: user?.email }
-      );
-      setTransactionHistory(response.data.transaction_history);
-    } catch (error) {
-      console.error("Error fetching transaction history:", error);
-      alert("An error occurred while fetching transaction history.");
-    }
-  };
+  
 
   useEffect(() => {
+    if (!user?.email) return; // Wait until the user is available
+
+    const obtainTransactionHistory = async () => {
+      try {
+        const response = await axiosInstance.post(
+          "/get_transaction_history",
+          { email: user?.email }
+        );
+        setTransactionHistory(response.data.transaction_history);
+      } catch (error) {
+        console.error("Error fetching transaction history:", error);
+        alert("An error occurred while fetching transaction history.");
+      }
+    };
+  
     obtainTransactionHistory();
-  }, []);
+  }, [user?.email]);
 
   return (
     <>

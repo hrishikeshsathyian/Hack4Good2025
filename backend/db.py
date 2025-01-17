@@ -226,3 +226,41 @@ async def update_voucher_request(voucher_id):
     # Update voucher request status
     response = supabase.from_("items").update({"status": "REDEEMED"}).eq("id", voucher_id).execute()
     return response
+
+async def add_auction_item(name, description):
+    # Add item to auction inventory
+    result = supabase.from_("products").insert([{"name": name,"description": description, "qty": 0, "price": 0, "category": "Others", "is_auction": True }]).execute()
+    id = result.data[0]["id"]
+    response = supabase.from_("auction_items").insert([{"product_id": id}]).execute()
+    return response
+
+async def pull_auction_items():
+    # Fetch auction items
+    response = supabase.from_("products").select("*").eq("is_auction", True).execute()
+    # get items from auction_items table with the product id 
+    auction_items = response.data
+    for item in auction_items:
+        auction_item = supabase.from_("auction_items").select("*").eq("product_id", item["id"]).execute()
+        item["auction_item"] = auction_item.data
+    value = []
+    for item in auction_items:
+        if item["auction_item"]:
+            current_highest_bidder = await get_user_name_from_id(item["auction_item"][0]["current_highest_bidder"]) if item["auction_item"][0]["current_highest_bidder"] else None
+            value.append({
+                "id": item["id"],
+                "name": item["name"],
+                "description": item["description"],
+                "current_highest_bid": item["auction_item"][0]["current_highest_bid"],
+                "current_highest_bidder": current_highest_bidder,
+                "status": "ONGOING" if not item["auction_item"][0]["is_sold"] else "SOLD",
+                "current_highest_bidder_id": item["auction_item"][0]["current_highest_bidder"],
+                "auction_product_id": item["auction_item"][0]["id"]
+            })
+    return value
+
+async def end_auction(current_highest_bidder_id, auction_id, auction_product_id):
+    # End auction
+    response = supabase.from_("auction_items").update({"is_sold": True}).eq("id", auction_id).execute()
+    response = supabase.from_("items").insert([{"product_id": auction_product_id, "user_id": current_highest_bidder_id, "status": "READY"}]).execute()
+
+    return response

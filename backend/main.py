@@ -358,10 +358,29 @@ async def get_user_voucher_points(email: str):
         return {"message": str(e)}
     
 class PurchaseRequest(BaseModel):
-    product_id: str  # or UUID4 if you want strict UUID validation
-    user_id: str
+    product_id: str
+    user_email: str  # Changed from user_id to user_email
     quantity: int = 1
 
 @app.post("/purchase_product")
 async def purchase_product(request: PurchaseRequest):
-    return await db.process_purchase(request.product_id, request.user_id, request.quantity)
+    return await db.process_purchase(request.product_id, request.user_email, request.quantity)
+
+class RequestProduct(BaseModel):
+    product_id: str
+    user_email: str
+    quantity: int = 1
+
+@app.post("/request_product")
+async def request_product(request: RequestProduct):
+    return await db.process_request(request.product_id, request.user_email, request.quantity)
+
+class PlaceBid(BaseModel):
+    auction_id: str
+    user_email: str
+    bid_amount: int
+
+@app.post("/place_bid")
+async def place_bid(request: PlaceBid):
+    print(f"Received auction_id: {request.auction_id}")
+    return await db.process_bid(request.auction_id, request.user_email, request.bid_amount)

@@ -68,34 +68,68 @@ export default function Minimart() {
     try {
       const response = await axiosInstance.post("/purchase_product", {
         product_id: selectedProduct.id,
-        user_id: "current_user_id", // Replace with actual user ID from your auth system
+        user_email: user.email,
         quantity: quantity
       });
 
-      // Show success message
-      alert(`Successfully purchased ${quantity} ${selectedProduct.name}!`);
+      // Show success message with cost details
+      const totalCost = quantity * selectedProduct.price;
+      alert(`Successfully purchased ${quantity} ${selectedProduct.name}! Cost: $${totalCost}`);
       
       // Close the modal
       closeModal();
       
-      // Refresh the product list
-      await getAllProducts();
+      // Refresh both the product list and voucher points
+      await Promise.all([
+        getAllProducts(),
+        fetchVoucherPoints() 
+      ]);
       
     } catch (error) {
-      // Handle different types of errors
       if (error.response) {
-        // Server responded with an error
         const errorMessage = error.response.data.detail || "An error occurred during purchase";
         alert(errorMessage);
       } else if (error.request) {
-        // Request was made but no response received
         alert("No response from server. Please try again.");
       } else {
-        // Something else went wrong
         alert("An error occurred. Please try again.");
       }
     }
-  };
+};
+
+const handleRequest = async () => {
+  try {
+    const response = await axiosInstance.post("/request_product", {
+      product_id: selectedProduct.id,
+      user_email: user.email,
+      quantity: quantity
+    });
+
+    // Show success message with cost details
+    const totalCost = quantity * selectedProduct.price;
+    alert(`Successfully requested ${quantity} ${selectedProduct.name}! Cost: $${totalCost}`);
+    
+    // Close the modal
+    closeModal();
+    
+    // Refresh both the product list and voucher points
+    await Promise.all([
+      getAllProducts(),
+      fetchVoucherPoints() 
+    ]);
+    
+  } catch (error) {
+    if (error.response) {
+      const errorMessage = error.response.data.detail || "An error occurred during request";
+      alert(errorMessage);
+    } else if (error.request) {
+      alert("No response from server. Please try again.");
+    } else {
+      alert("An error occurred. Please try again.");
+    }
+  }
+};
+
 
   const getFilteredProducts = async (filter: string) => {
     try {
@@ -339,13 +373,11 @@ export default function Minimart() {
               <div className="text-red-600 font-bold justify-between bg-white">
                 Out of Stock
                 <button
-                  className="ml-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-800"
-                  onClick={() =>
-                    alert(`Requesting item: ${selectedProduct.name}`)
-                  }
-                >
-                  Request Item
-                </button>
+  className="ml-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-800"
+  onClick={handleRequest}
+>
+  Request Item
+</button>
               </div>
             )}
           </div>

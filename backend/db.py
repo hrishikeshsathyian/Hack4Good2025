@@ -317,14 +317,20 @@ async def record_purchase_transaction(user_id: str, product_id: int, quantity: i
     }]).execute()
     return response
 
-async def process_purchase(product_id: str, user_id: str, quantity: int = 1):
+async def process_purchase(product_id: str, user_email: str, quantity: int = 1):
     try:
+        # First get user_id from email
+        user_response = await get_user_from_email(user_email)
+        if not user_response:
+            raise HTTPException(status_code=404, detail="User not found")
+        user_id = user_response[0]["uid"]  # Get the uid from the first user found
+        
         # Get product details
         product = await get_product_details(product_id)
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
         
-        # Get user's points
+        # Get user's points using the retrieved user_id
         user_points = await get_user_points(user_id)
         if user_points is None:
             raise HTTPException(status_code=404, detail="User not found")
@@ -386,6 +392,161 @@ async def process_purchase(product_id: str, user_id: str, quantity: int = 1):
             }
         }
         
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+async def process_request(product_id: str, user_email: str, quantity: int = 1):
+    try:
+        # First get user_id from email
+        user_response = await get_user_from_email(user_email)
+        if not user_response:
+            raise HTTPException(status_code=404, detail="User not found")
+        user_id = user_response[0]["uid"]  # Get the uid from the first user found
+        
+        # Get product details
+        product = await get_product_details(product_id)
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
+        
+        # Get user's points using the retrieved user_id
+        user_points = await get_user_points(user_id)
+        if user_points is None:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        total_cost = product["price"] * quantity
+        
+        # Validate sufficient voucher points
+        if user_points < total_cost:
+            raise HTTPException(status_code=400, detail="Insufficient voucher points")
+        
+        # 1. Update product quantity in products table (can go negative for requests)
+        update_product_response = await update_product_quantity(product_id, quantity)
+        if not update_product_response:
+            raise HTTPException(status_code=500, detail="Failed to update product quantity")
+        
+        # 2. Create items - one at a time to get their IDs
+        item_ids = []
+        for _ in range(quantity):
+            items_response = supabase.from_("items").insert({
+                "product_id": product_id,
+                "status": "REQUESTED",
+                "user_id": user_id,
+                "id": str(uuid.uuid4())
+            }).execute()
+            
+            if not items_response or not items_response.data:
+                raise HTTPException(status_code=500, detail="Failed to create item")
+            
+            item_ids.append(items_response.data[0]["id"])
+
+        # 3. Create voucher outflows - one for each item
+        for item_id in item_ids:
+            outflow_response = supabase.from_("voucher_outflow").insert({
+                "recipient_id": user_id,
+                "product_id": product_id,
+                "item_id": item_id,
+                "amount": product["price"]
+            }).execute()
+            
+            if not outflow_response:
+                raise HTTPException(status_code=500, detail="Failed to record voucher outflow")
+
+        # 4. Update user's voucher points
+        update_points_response = await update_user_points(user_id, total_cost)
+        if not update_points_response:
+            raise HTTPException(status_code=500, detail="Failed to update user points")
+        
+        return {
+            "message": "Request successful",
+            "transaction": {
+                "product_name": product["name"],
+                "quantity": quantity,
+                "total_cost": total_cost,
+                "item_ids": item_ids
+            }
+        }
+        
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+async def process_bid(auction_id: str, user_email: str, bid_amount: int):
+    try:
+        # Get user details
+        user = await get_user_from_email(user_email)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        bidder_id = user[0]["uid"]
+
+        # Get auction details
+        auction_response = supabase.from_("auction_items").select("*").eq("id", auction_id).execute()
+        if not auction_response.data or len(auction_response.data) == 0:
+            raise HTTPException(status_code=404, detail="Auction not found")
+        
+        auction = auction_response.data[0]
+
+        current_bid = auction["current_highest_bid"]
+        current_bidder = auction["current_highest_bidder"]
+
+        # Validate bid amount
+        if bid_amount <= current_bid:
+            raise HTTPException(status_code=400, detail="Bid must be higher than current bid")
+
+        # Check if bidder has enough points
+        bidder_points = await get_user_points(bidder_id)
+        if bidder_points < bid_amount:
+            raise HTTPException(status_code=400, detail="Insufficient voucher points")
+
+        # Return voucher points to previous bidder if exists
+        if current_bidder:
+            # Create voucher inflow for previous bidder
+            inflow_response = supabase.from_("voucher_inflow").insert({
+                "amount": current_bid,
+                "recipient_id": current_bidder,
+                "issuer_id": bidder_id
+            }).execute()
+
+            # Delete previous voucher outflow
+            outflow_delete_response = supabase.from_("voucher_outflow").delete().eq("recipient_id", current_bidder).eq("is_auction", True).execute()
+
+            # Update previous bidder's points
+            prev_bidder_update = supabase.rpc(
+                'increment_points',
+                {'user_id': current_bidder, 'amount': current_bid}
+            ).execute()
+
+        # Create new voucher outflow for new bidder
+        new_outflow_response = supabase.from_("voucher_outflow").insert({
+            "amount": bid_amount,
+            "recipient_id": bidder_id,
+            "is_auction": True
+        }).execute()
+
+        # Update new bidder's points
+        new_bidder_update = supabase.rpc(
+            'decrement_points',
+            {'user_id': bidder_id, 'amount': bid_amount}
+        ).execute()
+
+        # Update auction_items with new highest bid
+        auction_update = supabase.from_("auction_items").update({
+            "current_highest_bid": bid_amount,
+            "current_highest_bidder": bidder_id,
+            "updated_at": "now()"
+        }).eq("id", auction_id).execute()
+
+        # Insert into auction_bids
+        bid_insert = supabase.from_("auction_bids").insert({
+            "id": auction_id,
+            "bidder_id": bidder_id,
+            "bid_amount": bid_amount
+        }).execute()
+
+        return {"message": "Bid placed successfully"}
+
     except HTTPException as e:
         raise e
     except Exception as e:

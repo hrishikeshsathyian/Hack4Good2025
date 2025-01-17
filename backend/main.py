@@ -3,7 +3,7 @@ from fastapi import FastAPI
 import ai
 from supabase_setup import supabase
 from firebase_setup import admin_auth
-from interfaces import CreateUserBody, GenerateAiBody, GetBreakdownBody, UpdateInventoryBody, UpdateStatusBody, UpdateUserBody, addItemBody
+from interfaces import AddAuctionItemBody, CreateUserBody, EndAuctionItemBody, GenerateAiBody, GetBreakdownBody, UpdateInventoryBody, UpdateStatusBody, UpdateUserBody, addItemBody
 from interfaces import CreateUserBody, UUIDBody, UpdateInventoryBody
 from fastapi.middleware.cors import CORSMiddleware
 import db
@@ -312,7 +312,50 @@ async def update_user(body: UpdateUserBody):
         print(f"Error updating user: {e}")
         return {"message": str(e)}
 
-
+@app.post("/add_auction_item")
+async def add_auction_item(body: AddAuctionItemBody):
+    try:
+        response = await db.add_auction_item(body.name, body.description)
+        return response
+    except Exception as e:
+        print(f"Error adding auction item: {e}")
+        return {"message": str(e)}
+    
+@app.get("/auction_items")
+async def get_auction_items():
+    try:
+        response = await db.pull_auction_items()
+        return response
+    except Exception as e:
+        print(f"Error fetching auction items: {e}")
+        return {"message": str(e)}
+    
+@app.post("/end_auction")
+async def end_auction(body: EndAuctionItemBody):
+    try:
+        response = await db.end_auction(body.current_highest_bidder_id, body.auction_product_id,body.auction_id)
+        return response
+    except Exception as e:
+        print(f"Error ending auction: {e}")
+        return {"message": str(e)}
+    
+@app.get("/get_user_role/{email}")
+async def get_user_role(email: str):
+    try:
+        response = supabase.from_("users").select("role").eq("email", email).execute()
+        return response.data[0]["role"]
+    except Exception as e:
+        print(f"Error fetching user: {e}")
+        return {"message": str(e)}
+    
+@app.get("/get_user_voucher_points/{email}")
+async def get_user_voucher_points(email: str):
+    try:
+        response = supabase.from_("users").select("voucher_points").eq("email", email).execute()
+        return response.data[0]["voucher_points"]
+    except Exception as e:
+        print(f"Error fetching user: {e}")
+        return {"message": str(e)}
     
 class PurchaseRequest(BaseModel):
     product_id: str  # or UUID4 if you want strict UUID validation

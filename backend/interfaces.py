@@ -64,3 +64,13 @@ class Transaction(BaseModel):
     acquired_at: date 
     product_name: str
     price: int
+
+class AddAuctionItemBody(BaseModel):
+    name: str
+    description: str
+
+class EndAuctionItemBody(BaseModel):
+    current_highest_bidder_id: str
+    auction_id: str
+    auction_product_id: str 
+

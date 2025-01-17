@@ -56,3 +56,14 @@ export interface Transaction {
   product_name: string;
   price: number;
 }
+
+export interface AuctionItem {
+  id: string;
+  name: string;
+  description: string;
+  current_highest_bid: number;
+  current_highest_bidder: string;
+  status: string;
+  current_highest_bidder_id: string;
+  auction_product_id: string;
+}

@@ -1,9 +1,9 @@
-import uuid
+import uuid 
 from fastapi import FastAPI
 import ai
 from supabase_setup import supabase
 from firebase_setup import admin_auth
-from interfaces import CreateUserBody, GenerateAiBody, GetBreakdownBody, UpdateInventoryBody, UpdateStatusBody, addItemBody
+from interfaces import CreateUserBody, GenerateAiBody, GetBreakdownBody, UpdateInventoryBody, UpdateStatusBody, UpdateUserBody, addItemBody
 from interfaces import CreateUserBody, UUIDBody, UpdateInventoryBody
 from fastapi.middleware.cors import CORSMiddleware
 import db
@@ -42,6 +42,7 @@ async def create_user(body: CreateUserBody):
             "phone_number": body.phone_number,
             "date_of_birth": body.date_of_birth.strftime('%Y-%m-%d'),
             "age": body.age,
+            "voucher_points": body.voucher_points,
             "role": "resident",
         }]).execute()
      print(f"User {body.display_name} created supabase account successfully")
@@ -69,10 +70,15 @@ async def get_users():
     user_list = []
     users = admin_auth.list_users()
     for user in users.users:
+        supabase_user = supabase.from_("users").select("*").eq("email", user.email).execute().data
+        supabase_user = supabase_user[0] if supabase_user else {}
+
         user_obj = {
             "uid": user.uid,
+            "supabase_uid": supabase_user.get("uid"),
             "email": user.email,
-            "display_name": user.display_name
+            "display_name": user.display_name,
+            "voucher_points": supabase_user.get("voucher_points", 0),
         }
         user_list.append(user_obj)
 
@@ -110,7 +116,21 @@ async def get_all_products():
 @app.get("/get_filtered_products/{filter}")
 async def get_filtered_products(filter: str):
     result = await db.get_filtered_products(filter)
-    return result.data
+    if not result.data:
+        return {"error": "Failed to fetch products"}
+
+    products_with_images = []
+    for product in result.data:
+        image_path = product.get("image_path")
+        if image_path:
+            public_url = supabase.storage.from_('image').get_public_url(image_path)
+            product["image_url"] = public_url
+        else:
+            product["image_url"] = None
+
+        products_with_images.append(product)
+
+    return products_with_images
 
 @app.put("/inventory/update")
 async def update_inventory(body: UpdateInventoryBody):
@@ -276,6 +296,23 @@ async def approve_voucher_request(transaction_id: str):
     except Exception as e:
         print(f"Error approving voucher request: {e}")
         return {"message": str(e)}
+    
+@app.post("/update_user")
+async def update_user(body: UpdateUserBody):
+    try:
+        admin_auth.update_user(uid=body.uid, display_name=body.display_name, email=body.email)
+
+        # Perform the update with Supabase
+        supabase.from_("users").update({
+            "display_name": body.display_name,
+            "email": body.email,
+            "voucher_points": body.voucher_points
+        }).eq("uid", uuid.UUID(body.supabase_id)).execute()
+    except Exception as e:
+        print(f"Error updating user: {e}")
+        return {"message": str(e)}
+
+
     
 class PurchaseRequest(BaseModel):
     product_id: str  # or UUID4 if you want strict UUID validation

@@ -16,51 +16,18 @@ export default function Minimart() {
     try {
       const response = await axiosInstance.post(
         "/get_transaction_history",
-        { uuid: "199df3ea-8bb4-43be-bf23-d5677582bfee" } // Pass the recipient_id as a JSON object
+        { uuid: "199df3ea-8bb4-43be-bf23-d5677582bfee" }
       );
-      setTransactionHistory(response.data.transaction_history); // Update state
+      setTransactionHistory(response.data.transaction_history);
     } catch (error) {
       console.error("Error fetching transaction history:", error);
       alert("An error occurred while fetching transaction history.");
     }
   };
 
-  // Fetch transaction history on page load
   useEffect(() => {
     obtainTransactionHistory();
   }, []);
-
-  // Fake transaction data (replace this with Supabase data later)
-  // Note that the transaction date data is in UTC format
-  const fakeTransactions = [
-    {
-      id: "1",
-      amount: 50,
-      issuer: "Admin",
-      item: null,
-      quantity: 1,
-      date_of_transaction: "2025-01-01T10:00:00Z",
-      transaction_type: "inflow",
-    },
-    {
-      id: "2",
-      amount: -20,
-      issuer: null,
-      item: "Product XYZ",
-      quantity: 2,
-      date_of_transaction: "2025-01-03T15:30:00Z",
-      transaction_type: "outflow",
-    },
-    {
-      id: "3",
-      amount: 100,
-      issuer: "Admin",
-      item: null,
-      quantity: null,
-      date_of_transaction: "2025-01-05T12:00:00Z",
-      transaction_type: "inflow",
-    },
-  ];
 
   return (
     <>
@@ -81,7 +48,6 @@ export default function Minimart() {
           {/* Header Section */}
           <div className="w-full text-white flex justify-between items-center px-6 py-4 bg-blue-900">
             <div className="flex items-center space-x-2">
-              {/* Hamburger Menu Icon */}
               <button
                 onClick={handleMenuToggle}
                 className="p-2 focus:outline-none"
@@ -102,7 +68,6 @@ export default function Minimart() {
                   />
                 </svg>
               </button>
-              {/* Shopping Cart Icon and Title */}
               <Image
                 src="/shopping_cart_icon.png"
                 alt="Shopping Cart Icon"
@@ -116,7 +81,6 @@ export default function Minimart() {
                 ONLINE MINIMART
               </span>
             </div>
-            {/* Voucher Balance */}
             <span className="font-medium text-lg">0.00</span>
           </div>
 
@@ -131,8 +95,8 @@ export default function Minimart() {
           >
             <ul className="space-y-2 p-4">
               <li>
-                <a href="home" className="hover:underline">
-                  Home
+                <a href="pending-items" className="hover:underline">
+                  Pending Items
                 </a>
               </li>
               <li>
@@ -154,77 +118,54 @@ export default function Minimart() {
           </div>
 
           {/* Transaction Table Section */}
-          <div className="p-4 m-0 mt-0">
+          <div className="p-4 m-0 mt-0 bg-white">
             <h2 className="text-lg font-bold mb-4 mt-0 text-black text-center">
               Transaction History
             </h2>
             <div className="overflow-x-auto mx-auto">
               <table className="min-w-full border-collapse">
-                <thead className="bg-gray-100">
+                <thead className="bg-white border-b-2">
                   <tr>
-                    <th
-                      className="px-4 py-2 text-left"
-                      style={{ color: "#424242" }}
-                    >
-                      Amount
-                    </th>
-                    <th
-                      className="px-4 py-2 text-left"
-                      style={{ color: "#424242" }}
-                    >
-                      Issuer
-                    </th>
-                    <th
-                      className="px-4 py-2 text-left"
-                      style={{ color: "#424242" }}
-                    >
-                      Item
-                    </th>
-                    <th
-                      className="px-4 py-2 text-left"
-                      style={{ color: "#424242" }}
-                    >
-                      Quantity
-                    </th>
-                    <th
-                      className="px-4 py-2 text-left"
-                      style={{ color: "#424242" }}
-                    >
-                      Date
-                    </th>
+                    <th className="px-4 py-2 text-left text-gray-700">Amount</th>
+                    <th className="px-4 py-2 text-left text-gray-700">Issuer</th>
+                    <th className="px-4 py-2 text-left text-gray-700">Item</th>
+                    <th className="px-4 py-2 text-left text-gray-700">Quantity</th>
+                    <th className="px-4 py-2 text-left text-gray-700">Date</th>
+                    <th className="px-4 py-2 text-left text-gray-700">Type</th>
                   </tr>
                 </thead>
-                <tbody className="shadow">
-                  {transactionHistory.map((txn) => (
+                <tbody>
+                  {transactionHistory.map((txn, index) => (
                     <tr
                       key={txn.id}
                       className={`${
-                        txn.transaction_type === "inflow"
-                          ? "bg-emerald-100"
-                          : "bg-rose-100"
+                        index % 2 === 0 ? "bg-gray-50" : "bg-gray-100"
                       }`}
                     >
-                      {/* Amount */}
-                      <td className="px-4 py-2" style={{ color: "#424242" }}>
-                        {txn.amount}
-                      </td>
-                      {/* Issuer */}
-                      <td className="px-4 py-2" style={{ color: "#424242" }}>
+                      <td className="px-4 py-2 text-gray-800">{txn.amount}</td>
+                      <td className="px-4 py-2 text-gray-800">
                         {txn.issuer_name || "-"}
                       </td>
-                      {/* Item */}
-                      <td className="px-4 py-2" style={{ color: "#424242" }}>
-                        {txn.product_name}
+                      <td className="px-4 py-2 text-gray-800">
+                        {txn.product_name || "-"}
                       </td>
-                      {/* Quantity */}
-                      <td className="px-4 py-2" style={{ color: "#424242" }}>
+                      <td className="px-4 py-2 text-gray-800">
                         {txn.quantity || "-"}
                       </td>
-                      {/* Date */}
-                      <td className="px-4 py-2" style={{ color: "#424242" }}>
+                      <td className="px-4 py-2 text-gray-800">
                         {new Date(txn.created_at).toLocaleString("en-SG", {
                           timeZone: "Asia/Singapore",
                         })}
+                      </td>
+                      <td
+                        className={`px-4 py-2 font-semibold ${
+                          txn.transaction_type === "inflow"
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {txn.transaction_type.charAt(0).toUpperCase() +
+                          txn.transaction_type.slice(1)}
                       </td>
                     </tr>
                   ))}

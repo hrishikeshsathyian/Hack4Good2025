@@ -10,6 +10,7 @@ export default function Minimart() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null); // Store selected product details
   const [productList, setProductList] = useState<any[]>([]); // Store product list
+  const [quantity, setQuantity] = useState(1); // Store selected quantity for purchase
 
   const handleMenuToggle = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -17,6 +18,7 @@ export default function Minimart() {
 
   const openModal = (product: SetStateAction<null>) => {
     setSelectedProduct(product);
+    setQuantity(1); // Reset quantity when a new product is selected
     setIsModalOpen(true);
   };
 
@@ -55,6 +57,20 @@ export default function Minimart() {
   useEffect(() => {
     getAllProducts();
   }, []);
+
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Math.max(1, Math.min(selectedProduct?.qty ?? 1, parseInt(e.target.value))); // Ensure quantity is within the valid range
+    setQuantity(value);
+  };
+
+  const handlePurchase = () => {
+    if (quantity > selectedProduct?.qty) {
+      alert(`You can't purchase more than ${selectedProduct?.qty} items.`);
+      return;
+    }
+    alert(`Purchasing ${quantity} of ${selectedProduct.name}`);
+    // Proceed with the purchase logic (e.g., make API call to process purchase)
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -142,17 +158,16 @@ export default function Minimart() {
           {/* Voucher Balance */}
           <span className="font-medium text-lg">0.00</span>
         </div>
-
-        {/* Mobile Menu Dropdown */}
-        <div
+{/* Mobile Menu Dropdown */}
+<div
           className={`absolute top-[4.5rem] left-200 w-full bg-white z-50 shadow-lg transform transition-all duration-300 ${
             isMobileMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
           } overflow-hidden`}
         >
           <ul className="space-y-2 p-4 text-gray-700">
             <li>
-              <a href="home" className="hover:underline">
-                Home
+              <a href="pending-items" className="hover:underline">
+                Pending Items
               </a>
             </li>
             <li>
@@ -172,7 +187,6 @@ export default function Minimart() {
             </li>
           </ul>
         </div>
-
         {/* Main Content */}
         <div className="flex-1 overflow-y-scroll px-6 py-4 bg-gray-200">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -180,10 +194,11 @@ export default function Minimart() {
             {productList.map((product) => (
               <div
                 key={product.id}
-                className="bg-gray-300 h-40 shadow-md flex flex-col justify-between transform transition-transform duration-300 hover:scale-105 cursor-pointer"
+                className="bg-gray-300 shadow-md flex transform transition-transform duration-300 hover:scale-105 cursor-pointer"
                 onClick={() => openModal(product)}
               >
-                <div className="flex justify-center w-100 h-100">
+                {/* Product Image */}
+                <div className="w-1/3 h-full">
                   <Image
                     src={product.image_url ?? "/no_image.png"}
                     alt={product.name}
@@ -191,22 +206,34 @@ export default function Minimart() {
                     height={100}
                     style={{
                       objectFit: "cover",
+                      width: "100%",
                       height: "100%",
                     }}
                   />
                 </div>
-                <div className="bg-white w-full h-10 border-t-2 flex items-center justify-center space-x-2">
-                  <span className="text-sm text-gray-700 font-medium">
+
+                {/* Product Details */}
+                <div className="w-2/3 flex flex-col justify-center items-center bg-white p-4">
+                  <span className="text-lg text-gray-700 font-bold text-center truncate">
                     {product.name}
                   </span>
-                  <span className="text-sm text-blue-700 font-medium">
-                    {product.price.toFixed(2)}
+                  <span className="text-lg text-blue-700 font-medium text-center">
+                    ${product.price.toFixed(2)}
+                  </span>
+                  <span
+                    className={`text-md font-medium text-center ${
+                      product.qty > 0 ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
+                    {product.qty > 0 ? `In Stock: ${product.qty}` : "Out of Stock"}
                   </span>
                 </div>
+
               </div>
             ))}
           </div>
         </div>
+
       </div>
 
       {/* Modal */}
@@ -239,17 +266,26 @@ export default function Minimart() {
             {selectedProduct.qty > 0 ? (
               <div className="text-green-600 font-bold">
                 In Stock: {selectedProduct.qty}
+                {/* Quantity Input */}
+                <div className="mt-4">
+                  <input
+                    type="number"
+                    value={quantity}
+                    onChange={handleQuantityChange}
+                    min="1"
+                    max={selectedProduct.qty}
+                    className="border border-gray-300 rounded-md p-2"
+                  />
+                </div>
                 <button
-                  className="ml-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-800"
-                  onClick={() =>
-                    alert(`Purchasing item: ${selectedProduct.name}`)
-                  }
+                  className="ml-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-800 mt-4"
+                  onClick={handlePurchase}
                 >
                   Purchase Item
                 </button>
               </div>
             ) : (
-              <div className="text-red-600 font-bold justify-between bg-black">
+              <div className="text-red-600 font-bold justify-between bg-white">
                 Out of Stock
                 <button
                   className="ml-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-800"

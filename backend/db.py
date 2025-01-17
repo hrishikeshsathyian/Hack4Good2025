@@ -170,17 +170,19 @@ async def update_item_status(product_id, quantity):
         response: The response from the Supabase query.
     """
     # Count how many items are already 'READY'
+    print("This is called")
     ready_count_response = (
         supabase.from_("items")
-        .select("id", count="exact")  # Count the exact number of items
+        .select("id", count="exact") 
         .eq("product_id", product_id)
         .eq("status", "READY")
         .execute()
     )
+
     
     
     ready_count = ready_count_response.count
-
+    print(ready_count)
     # Calculate the remaining quantity to update
     remaining_quantity = max(quantity - ready_count, 0)
 
@@ -192,7 +194,7 @@ async def update_item_status(product_id, quantity):
         supabase.from_("items")
         .select("id")  # Only fetch the IDs
         .eq("product_id", product_id)
-        .eq("status", "RESTOCK")
+        .eq("status", "REQUESTED")
         .limit(remaining_quantity)  # Limit the selection to the remaining quantity
         .execute()
     )

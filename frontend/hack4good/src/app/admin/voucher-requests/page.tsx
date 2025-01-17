@@ -5,8 +5,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import { ArrowLeftIcon } from "@heroicons/react/20/solid";
+
 
 
 export default function TransactionsPage() {

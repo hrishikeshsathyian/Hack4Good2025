@@ -1,8 +1,6 @@
 "use client";
 import axiosInstance from "@/utils/axiosInstance";
 import { AuctionItem } from "@/utils/interfaces";
-import { ArrowLeftIcon } from "@heroicons/react/24/solid";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeftIcon } from "@heroicons/react/20/solid";
@@ -13,7 +11,7 @@ export default function ManageAuctions() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newAuction, setNewAuction] = useState({ name: "", description: "" });
   const [toggle, setToggle] = useState(false);  
-  const router = useRouter();
+
     // Fetch auction items from the API
     useEffect(() => {
       async function fetchAuctionItems() {

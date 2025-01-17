@@ -52,7 +52,7 @@ export default function AdminDashboard() {
             className="flex items-center justify-center w-64 h-40 bg-gray-200 text-black text-lg font-semibold rounded-lg shadow-md transition hover:bg-blue-500 hover:text-white"
           >
             <FaBook className="mr-2" />
-            Voucher Requests
+            Voucher Transactions
           </button>
           <button
             onClick={() => router.push("/admin/manage-inventory")}

@@ -346,3 +346,12 @@ async def get_user_role(email: str):
     except Exception as e:
         print(f"Error fetching user: {e}")
         return {"message": str(e)}
+    
+@app.get("/get_user_voucher_points/{email}")
+async def get_user_voucher_points(email: str):
+    try:
+        response = supabase.from_("users").select("voucher_points").eq("email", email).execute()
+        return response.data[0]["voucher_points"]
+    except Exception as e:
+        print(f"Error fetching user: {e}")
+        return {"message": str(e)}

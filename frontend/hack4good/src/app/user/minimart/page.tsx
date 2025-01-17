@@ -1,6 +1,8 @@
 "use client";
 
+import { useAuth } from "@/context/AuthContext";
 import axiosInstance from "@/utils/axiosInstance";
+import { time } from "console";
 import Image from "next/image";
 import { SetStateAction, useEffect, useState } from "react";
 
@@ -11,7 +13,9 @@ export default function Minimart() {
   const [selectedProduct, setSelectedProduct] = useState(null); // Store selected product details
   const [productList, setProductList] = useState<any[]>([]); // Store product list
   const [quantity, setQuantity] = useState(1); // Store selected quantity for purchase
-
+  const [voucherPoints, setVoucherPoints] = useState(0); // Track voucher points during edit
+  
+  const {user} = useAuth();
   const handleMenuToggle = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -36,6 +40,24 @@ export default function Minimart() {
       alert("An error occurred while fetching products.");
     }
   };
+  
+
+  useEffect(() => {
+    if (!user?.email) return; // Wait until the user is available
+
+    const fetchVoucherPoints = async () => {
+      try {
+        const response = await axiosInstance.get(`/get_user_voucher_points/${user.email}`);
+        setVoucherPoints(response.data); // Set voucher points
+      } catch (error) {
+        console.error("Error fetching voucher points:", error);
+        setVoucherPoints(0); // Indicate failure
+      } finally {
+      }
+    };
+
+    fetchVoucherPoints();
+  }, [user?.email]);
 
   const getFilteredProducts = async (filter: string) => {
     try {
@@ -57,6 +79,8 @@ export default function Minimart() {
   useEffect(() => {
     getAllProducts();
   }, []);
+
+
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Math.max(1, Math.min(selectedProduct?.qty ?? 1, parseInt(e.target.value))); // Ensure quantity is within the valid range
@@ -156,7 +180,7 @@ export default function Minimart() {
             </button>
           </div>
           {/* Voucher Balance */}
-          <span className="font-medium text-lg">0.00</span>
+          <span className="font-medium text-lg">{voucherPoints}</span>
         </div>
 {/* Mobile Menu Dropdown */}
 <div

@@ -78,6 +78,44 @@ export default function Minimart() {
     fetchVoucherPoints();
   }, [user?.email]);
 
+  const handlePurchase = async () => {
+    if (quantity > selectedProduct?.qty) {
+      alert(`You can't purchase more than ${selectedProduct?.qty} items.`);
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.post("/purchase_product", {
+        product_id: selectedProduct.id,
+        user_id: "current_user_id", // Replace with actual user ID from your auth system
+        quantity: quantity
+      });
+
+      // Show success message
+      alert(`Successfully purchased ${quantity} ${selectedProduct.name}!`);
+      
+      // Close the modal
+      closeModal();
+      
+      // Refresh the product list
+      await getAllProducts();
+      
+    } catch (error) {
+      // Handle different types of errors
+      if (error.response) {
+        // Server responded with an error
+        const errorMessage = error.response.data.detail || "An error occurred during purchase";
+        alert(errorMessage);
+      } else if (error.request) {
+        // Request was made but no response received
+        alert("No response from server. Please try again.");
+      } else {
+        // Something else went wrong
+        alert("An error occurred. Please try again.");
+      }
+    }
+  };
+
   const getFilteredProducts = async (filter: string) => {
     try {
       const response = await axiosInstance.get(
@@ -104,15 +142,6 @@ export default function Minimart() {
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Math.max(1, Math.min(selectedProduct?.qty ?? 1, parseInt(e.target.value))); // Ensure quantity is within the valid range
     setQuantity(value);
-  };
-
-  const handlePurchase = () => {
-    if (quantity > selectedProduct?.qty) {
-      alert(`You can't purchase more than ${selectedProduct?.qty} items.`);
-      return;
-    }
-    alert(`Purchasing ${quantity} of ${selectedProduct.name}`);
-    // Proceed with the purchase logic (e.g., make API call to process purchase)
   };
 
   return (
@@ -281,12 +310,10 @@ export default function Minimart() {
                     {product.qty > 0 ? `In Stock: ${product.qty}` : "Out of Stock"}
                   </span>
                 </div>
-
               </div>
             ))}
           </div>
         </div>
-
       </div>
 
       {/* Modal */}

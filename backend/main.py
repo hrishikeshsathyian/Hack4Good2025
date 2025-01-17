@@ -7,6 +7,7 @@ from interfaces import AddAuctionItemBody, CreateUserBody, EndAuctionItemBody, G
 from interfaces import CreateUserBody, UUIDBody, UpdateInventoryBody
 from fastapi.middleware.cors import CORSMiddleware
 import db
+from pydantic import BaseModel, UUID4
 
 app = FastAPI()
 
@@ -355,3 +356,12 @@ async def get_user_voucher_points(email: str):
     except Exception as e:
         print(f"Error fetching user: {e}")
         return {"message": str(e)}
+    
+class PurchaseRequest(BaseModel):
+    product_id: str  # or UUID4 if you want strict UUID validation
+    user_id: str
+    quantity: int = 1
+
+@app.post("/purchase_product")
+async def purchase_product(request: PurchaseRequest):
+    return await db.process_purchase(request.product_id, request.user_id, request.quantity)

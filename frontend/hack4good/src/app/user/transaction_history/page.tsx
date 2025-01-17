@@ -2,32 +2,56 @@
 
 import axiosInstance from "@/utils/axiosInstance";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { signOut } from "firebase/auth";
+import { auth } from "../../../../lib/firebase";
+import toast from "react-hot-toast";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Minimart() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [transactionHistory, setTransactionHistory] = useState<any[]>([]);
-
+  const router = useRouter();
+  const {user} = useAuth();
   const handleMenuToggle = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const obtainTransactionHistory = async () => {
+  const handleLogout = async () => {
+    const confirmLogout = window.confirm("Are you sure you want to log out of your account?");
+    if (!confirmLogout) return;
     try {
-      const response = await axiosInstance.post(
-        "/get_transaction_history",
-        { uuid: "199df3ea-8bb4-43be-bf23-d5677582bfee" }
-      );
-      setTransactionHistory(response.data.transaction_history);
+      await signOut(auth);
+      toast.success("Logged out successfully! See you again :)", {
+        duration: 5000,
+      });
+      router.push("/auth");
     } catch (error) {
-      console.error("Error fetching transaction history:", error);
-      alert("An error occurred while fetching transaction history.");
+      console.error("Error logging out:", error);
     }
   };
 
+  
+
   useEffect(() => {
+    if (!user?.email) return; // Wait until the user is available
+
+    const obtainTransactionHistory = async () => {
+      try {
+        const response = await axiosInstance.post(
+          "/get_transaction_history",
+          { email: user?.email }
+        );
+        setTransactionHistory(response.data.transaction_history);
+      } catch (error) {
+        console.error("Error fetching transaction history:", error);
+        alert("An error occurred while fetching transaction history.");
+      }
+    };
+  
     obtainTransactionHistory();
-  }, []);
+  }, [user?.email]);
 
   return (
     <>
@@ -81,7 +105,16 @@ export default function Minimart() {
                 ONLINE MINIMART
               </span>
             </div>
-            <span className="font-medium text-lg">0.00</span>
+            <div className="flex items-center space-x-4">
+    <span className="font-medium text-lg">0</span>
+    <button
+      onClick={handleLogout}
+      style={{ backgroundColor: "red"}}
+      className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md font-medium focus:outline-none"
+    >
+      Logout
+    </button>
+  </div>
           </div>
 
           {/* Mobile Menu Dropdown */}
@@ -171,9 +204,7 @@ export default function Minimart() {
                   ))}
                 </tbody>
               </table>
-              <div className="mt-4 text-gray-500 text-center">
-                Replace `fakeTransactions` with data fetched from Supabase!
-              </div>
+
             </div>
           </div>
         </div>

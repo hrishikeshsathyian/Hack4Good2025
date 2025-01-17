@@ -74,3 +74,5 @@ class EndAuctionItemBody(BaseModel):
     auction_id: str
     auction_product_id: str 
 
+class TransactionBody(BaseModel):
+    email: str

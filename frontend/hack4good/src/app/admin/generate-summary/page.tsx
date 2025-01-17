@@ -21,6 +21,7 @@ export default function GenerateReport() {
       value: number;
     };
   }
+  
 
   const [data, setData] = useState<ReportData>({});
   const [topItems, setTopItems] = useState<TopItem[]>([]);
@@ -167,12 +168,12 @@ export default function GenerateReport() {
                   className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition"
                   disabled={!userQuestion.trim() || isAiLoading}
                 >
-                  Ask AI
+                  {isAiLoading ? "Loading..." : "Ask AI"}
                 </button>
                 {aiResponse && (
                   <div className="bg-gray-50 p-4 rounded-md shadow">
-                    {isAiLoading && <p className="text-black-700">Loading AI Response...</p>}
-                    {!isAiLoading && <p className="text-black-700">{aiResponse}</p>}
+                    {isAiLoading && <p className="text-black">Loading AI Response...</p>}
+                    {!isAiLoading && <p className="text-black">{aiResponse}</p>}
                   </div>
                 )}
               </div>

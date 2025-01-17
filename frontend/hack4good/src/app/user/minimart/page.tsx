@@ -5,6 +5,10 @@ import axiosInstance from "@/utils/axiosInstance";
 import { time } from "console";
 import Image from "next/image";
 import { SetStateAction, useEffect, useState } from "react";
+import { signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
+import { auth } from "../../../../lib/firebase";
+import toast from "react-hot-toast";
 
 export default function Minimart() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -16,6 +20,7 @@ export default function Minimart() {
   const [voucherPoints, setVoucherPoints] = useState(0); // Track voucher points during edit
   
   const {user} = useAuth();
+  const router = useRouter();
   const handleMenuToggle = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -24,6 +29,20 @@ export default function Minimart() {
     setSelectedProduct(product);
     setQuantity(1); // Reset quantity when a new product is selected
     setIsModalOpen(true);
+  };
+
+  const handleLogout = async () => {
+    const confirmLogout = window.confirm("Are you sure you want to log out of your account?");
+    if (!confirmLogout) return;
+    try {
+      await signOut(auth);
+      toast.success("Logged out successfully! See you again :)", {
+        duration: 5000,
+      });
+      router.push("/auth");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
   };
 
   const closeModal = () => {
@@ -199,54 +218,64 @@ const handleRequest = async () => {
       <div className="flex flex-col flex-1">
         {/* Header Section */}
         <div className="w-full text-white flex justify-between items-center px-6 py-4 bg-blue-900 relative z-50">
-          <div className="flex items-center space-x-2">
-            {/* Hamburger Menu Icon */}
-            <button
-              onClick={handleMenuToggle}
-              className="p-2 focus:outline-none"
-              aria-label="Toggle menu"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
-            {/* Shopping Cart Icon and Title */}
-            <Image
-              src="/shopping_cart_icon.png"
-              alt="Shopping Cart Icon"
-              width={20}
-              height={20}
-            />
-            <span
-              className="font-medium text-lg tracking-wide"
-              style={{ letterSpacing: "0.2em" }}
-            >
-              ONLINE MINIMART
-            </span>
-            {/* Toggle Categories Button (Small Screens Only) */}
-            <button
-              className="ml-4 bg-white text-blue-600 px-3 py-2 rounded-md font-arimo sm:hidden"
-              onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
-            >
-              Categories
-            </button>
-          </div>
-          {/* Voucher Balance */}
-          <span className="font-medium text-lg">{voucherPoints}</span>
-        </div>
-        {/* Mobile Menu Dropdown */}
-        <div
+  <div className="flex items-center space-x-2">
+    {/* Hamburger Menu Icon */}
+    <button
+      onClick={handleMenuToggle}
+      className="p-2 focus:outline-none"
+      aria-label="Toggle menu"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-6 w-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M4 6h16M4 12h16M4 18h16"
+        />
+      </svg>
+    </button>
+    {/* Shopping Cart Icon and Title */}
+    <Image
+      src="/shopping_cart_icon.png"
+      alt="Shopping Cart Icon"
+      width={20}
+      height={20}
+    />
+    <span
+      className="font-medium text-lg tracking-wide"
+      style={{ letterSpacing: "0.2em" }}
+    >
+      ONLINE MINIMART
+    </span>
+    {/* Toggle Categories Button (Small Screens Only) */}
+    <button
+      className="ml-4 bg-white text-blue-600 px-3 py-2 rounded-md font-arimo sm:hidden"
+      onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
+    >
+      Categories
+    </button>
+  </div>
+  {/* Voucher Balance and Logout Button */}
+  <div className="flex items-center space-x-4">
+    <span className="font-medium text-lg">{voucherPoints}</span>
+    <button
+      onClick={handleLogout}
+      style={{ backgroundColor: "red"}}
+      className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md font-medium focus:outline-none"
+    >
+      Logout
+    </button>
+  </div>
+</div>
+
+{/* Mobile Menu Dropdown */}
+<div
           className={`absolute top-[4.5rem] left-200 w-full bg-white z-50 shadow-lg transform transition-all duration-300 ${
             isMobileMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
           } overflow-hidden`}

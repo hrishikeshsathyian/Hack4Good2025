@@ -4,6 +4,10 @@ import { useAuth } from "@/context/AuthContext";
 import axiosInstance from "@/utils/axiosInstance";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
+import { auth } from "../../../../lib/firebase";
+import toast from "react-hot-toast";
 
 export default function AuctionPage() {
   const [expandedCard, setExpandedCard] = useState(null);
@@ -12,7 +16,9 @@ export default function AuctionPage() {
   const [voucherPoints, setVoucherPoints] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { user } = useAuth();
+
+  const {user} = useAuth();
+  const router = useRouter();
 
   const toggleCard = (index) => {
     setExpandedCard(expandedCard === index ? null : index);
@@ -20,6 +26,20 @@ export default function AuctionPage() {
 
   const handleMenuToggle = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleLogout = async () => {
+    const confirmLogout = window.confirm("Are you sure you want to log out of your account?");
+    if (!confirmLogout) return;
+    try {
+      await signOut(auth);
+      toast.success("Logged out successfully! See you again :)", {
+        duration: 5000,
+      });
+      router.push("/auth");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
   };
 
   const handleFormClick = (event) => {
@@ -161,7 +181,21 @@ export default function AuctionPage() {
               ONLINE AUCTION
             </span>
           </div>
+<<<<<<< HEAD
           <span className="font-medium text-lg">{voucherPoints}</span>
+=======
+          {/* Voucher Balance */}
+          <div className="flex items-center space-x-4">
+    <span className="font-medium text-lg">{voucherPoints}</span>
+    <button
+      onClick={handleLogout}
+      style={{ backgroundColor: "red"}}
+      className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md font-medium focus:outline-none"
+    >
+      Logout
+    </button>
+  </div>
+>>>>>>> 4203dc35db56ee64e8bfa40659d6e8a12b697d10
         </div>
 
         {/* Mobile Menu Dropdown */}

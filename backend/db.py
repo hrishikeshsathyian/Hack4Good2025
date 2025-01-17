@@ -170,17 +170,19 @@ async def update_item_status(product_id, quantity):
         response: The response from the Supabase query.
     """
     # Count how many items are already 'READY'
+    print("This is called")
     ready_count_response = (
         supabase.from_("items")
-        .select("id", count="exact")  # Count the exact number of items
+        .select("id", count="exact") 
         .eq("product_id", product_id)
         .eq("status", "READY")
         .execute()
     )
+
     
     
     ready_count = ready_count_response.count
-
+    print(ready_count)
     # Calculate the remaining quantity to update
     remaining_quantity = max(quantity - ready_count, 0)
 
@@ -192,7 +194,7 @@ async def update_item_status(product_id, quantity):
         supabase.from_("items")
         .select("id")  # Only fetch the IDs
         .eq("product_id", product_id)
-        .eq("status", "RESTOCK")
+        .eq("status", "REQUESTED")
         .limit(remaining_quantity)  # Limit the selection to the remaining quantity
         .execute()
     )
@@ -397,6 +399,7 @@ async def process_purchase(product_id: str, user_email: str, quantity: int = 1):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
+<<<<<<< HEAD
 async def process_request(product_id: str, user_email: str, quantity: int = 1):
     try:
         # First get user_id from email
@@ -551,3 +554,8 @@ async def process_bid(auction_id: str, user_email: str, bid_amount: int):
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+async def user_id_from_email(email):
+    user_id = supabase.from_("users").select("uid").eq("email", email).execute()
+    return user_id.data[0]["uid"]
+

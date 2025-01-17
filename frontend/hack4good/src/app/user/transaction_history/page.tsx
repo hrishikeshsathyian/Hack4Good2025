@@ -7,12 +7,13 @@ import { useEffect, useState } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "../../../../lib/firebase";
 import toast from "react-hot-toast";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Minimart() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [transactionHistory, setTransactionHistory] = useState<any[]>([]);
   const router = useRouter();
-
+  const {user} = useAuth();
   const handleMenuToggle = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -35,7 +36,7 @@ export default function Minimart() {
     try {
       const response = await axiosInstance.post(
         "/get_transaction_history",
-        { uuid: "199df3ea-8bb4-43be-bf23-d5677582bfee" }
+        { email: user?.email }
       );
       setTransactionHistory(response.data.transaction_history);
     } catch (error) {
@@ -199,9 +200,7 @@ export default function Minimart() {
                   ))}
                 </tbody>
               </table>
-              <div className="mt-4 text-gray-500 text-center">
-                Replace `fakeTransactions` with data fetched from Supabase!
-              </div>
+
             </div>
           </div>
         </div>

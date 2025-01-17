@@ -390,3 +390,7 @@ async def process_purchase(product_id: str, user_id: str, quantity: int = 1):
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+async def user_id_from_email(email):
+    user_id = supabase.from_("users").select("uid").eq("email", email).execute()
+    return user_id.data[0]["uid"]

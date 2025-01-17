@@ -264,3 +264,8 @@ async def end_auction(current_highest_bidder_id, auction_id, auction_product_id)
     response = supabase.from_("items").insert([{"product_id": auction_product_id, "user_id": current_highest_bidder_id, "status": "READY"}]).execute()
 
     return response
+
+async def get_user_from_email(email):
+    # Get user details based on email
+    response = supabase.from_("users").select("*").eq("email", email).execute()
+    return response.data

@@ -13,7 +13,7 @@ export default function UsersPage() {
   const [editUser, setEditUser] = useState<firebaseUser | null>(null); // User being edited
   const [voucherPoints, setVoucherPoints] = useState(0); // Track voucher points during edit
   const router = useRouter();
-
+  const [toggle, setToggle] = useState(false);
   // Fetch users from the API
   useEffect(() => {
     async function fetchUsers() {
@@ -28,7 +28,7 @@ export default function UsersPage() {
       }
     }
     fetchUsers();
-  }, []);
+  }, [toggle]);
 
   // Delete user by email
   async function handleDelete(email: string) {
@@ -72,6 +72,8 @@ export default function UsersPage() {
         voucher_points: voucherPoints,
       }
       const response = await axiosInstance.post("/update_user", updateUserBody);
+      setToggle(!toggle);
+      toast.success("User updated successfully", { duration: 5000 });
       if (response.status === 200) {
         setEditUser(null);
       } else {

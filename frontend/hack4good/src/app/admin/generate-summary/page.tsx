@@ -4,6 +4,8 @@ import { Pie } from "react-chartjs-2";
 import "chart.js/auto";
 import axiosInstance from "@/utils/axiosInstance";
 import { TopItem } from "@/utils/interfaces";
+import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { useRouter } from "next/navigation";
 
 export default function GenerateReport() {
   const [startDate, setStartDate] = useState("");
@@ -12,7 +14,7 @@ export default function GenerateReport() {
   const [userQuestion, setUserQuestion] = useState("");
   const [aiResponse, setAiResponse] = useState(""); // Placeholder for AI response
   const [isAiLoading, setIsAiLoading] = useState(false);
-
+  const router = useRouter();
   interface ReportData {
     [key: string]: {
       qty: number;
@@ -177,6 +179,16 @@ export default function GenerateReport() {
             </div>
           </div>
         )}
+      </div>
+      <div className="mt-6 flex justify-center">
+      
+          <button
+            onClick={() => router.push("/admin/landing-page")}
+            className="flex items-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
+          >
+            <ArrowLeftIcon className="h-5 w-5 mr-2" />
+            Back To Landing Page
+          </button>
       </div>
     </div>
   );

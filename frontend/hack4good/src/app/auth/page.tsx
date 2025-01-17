@@ -4,10 +4,10 @@ import Image from "next/image";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../../lib/firebase";
 import { useAuth } from "@/context/AuthContext";
-import { GoogleAuthProvider } from "firebase/auth/web-extension";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import axiosInstance from "@/utils/axiosInstance";
 
 export default function Home() {
   const router = useRouter();
@@ -16,12 +16,30 @@ export default function Home() {
 
   const handleSignIn = async () => {
     signInWithPopup(auth, provider)
-      .then((result) => {
-        GoogleAuthProvider.credentialFromResult(result);
-        toast.success("Sign-in successful", {
-          duration: 5000,
-        });
-        router.push("/admin/landing-page");
+      .then(async (result) => {
+        try {
+          const user = result.user;
+          const email = user.email;
+          const response = await axiosInstance.get("/get_user_role/" + email);
+          console.log("Role is: ", response.data);
+ 
+  
+          toast.success(`Sign-in successful. Role: ${response.data}`, {
+            duration: 5000,
+          });
+  
+          // Navigate based on role or general admin page
+          if (response.data === "admin") {
+            router.push("/admin/landing-page");
+          } else {
+            router.push("/user/minimart");
+          }
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+          toast.error("Failed to determine user role. Please try again.", {
+            duration: 5000,
+          });
+        }
       })
       .catch((error) => {
         console.error("Sign-in error:", error);
@@ -31,6 +49,7 @@ export default function Home() {
         setError(error.message);
       });
   };
+  
   return (
     <div
       className="flex flex-col items-center justify-center min-h-screen"

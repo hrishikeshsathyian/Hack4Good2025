@@ -337,3 +337,12 @@ async def end_auction(body: EndAuctionItemBody):
     except Exception as e:
         print(f"Error ending auction: {e}")
         return {"message": str(e)}
+    
+@app.get("/get_user_role/{email}")
+async def get_user_role(email: str):
+    try:
+        response = supabase.from_("users").select("role").eq("email", email).execute()
+        return response.data[0]["role"]
+    except Exception as e:
+        print(f"Error fetching user: {e}")
+        return {"message": str(e)}

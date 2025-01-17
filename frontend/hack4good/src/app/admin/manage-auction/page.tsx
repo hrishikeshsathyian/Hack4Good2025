@@ -1,11 +1,13 @@
 "use client";
 import axiosInstance from "@/utils/axiosInstance";
 import { AuctionItem } from "@/utils/interfaces";
+import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function ManageAuctions() {
   const [auctionItems, setAuctionItems] = useState<AuctionItem[]>([]);
-
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newAuction, setNewAuction] = useState({ name: "", description: "" });
   const [toggle, setToggle] = useState(false);  
@@ -86,7 +88,8 @@ export default function ManageAuctions() {
                 <td className="px-4 py-2 border-b">
                   <button
                     onClick={() => handleEndAuction(item.current_highest_bidder_id, item.id, item.auction_product_id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                    className={`px-3 py-1 rounded ${item.status === "SOLD" ? "bg-gray-400 text-gray-700 cursor-not-allowed" : "bg-red-500 text-white hover:bg-red-600"}`}
+                    disabled={item.status === "SOLD"}
                   >
                     End Auction
                   </button>
@@ -95,6 +98,17 @@ export default function ManageAuctions() {
             ))}
           </tbody>
         </table>
+        <div className="mt-6 flex justify-center">
+        
+          <button
+            onClick={() => router.push("/admin/landing-page")}
+            className="flex items-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
+          >
+            <ArrowLeftIcon className="h-5 w-5 mr-2" />
+            Back To Landing Page
+          </button>
+ 
+      </div>
       </div>
 
       {/* Modal for Adding Auction Item */}

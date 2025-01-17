@@ -1,6 +1,8 @@
 "use client";
 import axiosInstance from "@/utils/axiosInstance";
 import { Transaction } from "@/utils/interfaces";
+import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -96,18 +98,19 @@ export default function TransactionsPage() {
             </tbody>
           </table>
         </div>
+
       </div>
       <div className="mt-6 flex justify-center">
-        
-          <button
-            onClick={() => router.push("/admin/landing-page")}
-            className="flex items-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
-          >
-            <ArrowLeftIcon className="h-5 w-5 mr-2" />
-            Back To Landing Page
-          </button>
-        
-      </div>
+
+<button
+  onClick={() => router.push("/admin/landing-page")}
+  className="flex items-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
+>
+  <ArrowLeftIcon className="h-5 w-5 mr-2" />
+  Back To Landing Page
+</button>
+
+</div>
     </div>
   );
 }

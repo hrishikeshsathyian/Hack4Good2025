@@ -118,7 +118,7 @@ const PendingItems = () => {
       </div>
       <div className="mt-6 flex justify-center">
                 <button
-                    onClick={() => router.push("/admin/landing-page")}
+                    onClick={() => router.push("/user/minimart")}
                     className="flex items-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
                 >
                     <ArrowLeftIcon className="h-5 w-5 mr-2" />

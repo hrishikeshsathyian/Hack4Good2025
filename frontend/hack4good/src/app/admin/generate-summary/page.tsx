@@ -4,8 +4,13 @@ import { Pie } from "react-chartjs-2";
 import "chart.js/auto";
 import axiosInstance from "@/utils/axiosInstance";
 import { TopItem } from "@/utils/interfaces";
+<<<<<<< HEAD
 import { useRouter } from "next/navigation";
 import { ArrowLeftIcon } from "@heroicons/react/20/solid";
+=======
+import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { useRouter } from "next/navigation";
+>>>>>>> 737e885c582824a1cab61f792e21874c9720f8dc
 
 export default function GenerateReport() {
   const [startDate, setStartDate] = useState("");
@@ -15,7 +20,10 @@ export default function GenerateReport() {
   const [aiResponse, setAiResponse] = useState(""); // Placeholder for AI response
   const [isAiLoading, setIsAiLoading] = useState(false);
   const router = useRouter();
+<<<<<<< HEAD
 
+=======
+>>>>>>> 737e885c582824a1cab61f792e21874c9720f8dc
   interface ReportData {
     [key: string]: {
       qty: number;
@@ -182,7 +190,11 @@ export default function GenerateReport() {
         )}
       </div>
       <div className="mt-6 flex justify-center">
+<<<<<<< HEAD
         
+=======
+      
+>>>>>>> 737e885c582824a1cab61f792e21874c9720f8dc
           <button
             onClick={() => router.push("/admin/landing-page")}
             className="flex items-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
@@ -190,7 +202,10 @@ export default function GenerateReport() {
             <ArrowLeftIcon className="h-5 w-5 mr-2" />
             Back To Landing Page
           </button>
+<<<<<<< HEAD
         
+=======
+>>>>>>> 737e885c582824a1cab61f792e21874c9720f8dc
       </div>
     </div>
   );

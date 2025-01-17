@@ -1,14 +1,18 @@
 "use client";
 
+import { useAuth } from "@/context/AuthContext";
+import axiosInstance from "@/utils/axiosInstance";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function AuctionPage() {
   const [expandedCard, setExpandedCard] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentBid, setCurrentBid] = useState(45.0); // Example current bid value
   const [inputValue, setInputValue] = useState(currentBid.toFixed(2));
+  const [voucherPoints, setVoucherPoints] = useState(0);
 
+  const {user} = useAuth();
   const toggleCard = (index) => {
     setExpandedCard(expandedCard === index ? null : index);
   };
@@ -20,7 +24,22 @@ export default function AuctionPage() {
   const handleFormClick = (event) => {
     event.stopPropagation();
   };
+  useEffect(() => {
+    if (!user?.email) return; // Wait until the user is available
 
+    const fetchVoucherPoints = async () => {
+      try {
+        const response = await axiosInstance.get(`/get_user_voucher_points/${user.email}`);
+        setVoucherPoints(response.data); // Set voucher points
+      } catch (error) {
+        console.error("Error fetching voucher points:", error);
+        setVoucherPoints(0); // Indicate failure
+      } finally {
+      }
+    };
+
+    fetchVoucherPoints();
+  }, [user?.email]);
   const handleInputChange = (event) => {
     const value = event.target.value;
 
@@ -76,7 +95,7 @@ export default function AuctionPage() {
             </span>
           </div>
           {/* Voucher Balance */}
-          <span className="font-medium text-lg">0.00</span>
+          <span className="font-medium text-lg">{voucherPoints}</span>
         </div>
 
         {/* Mobile Menu Dropdown */}

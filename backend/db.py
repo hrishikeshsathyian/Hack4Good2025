@@ -1,3 +1,5 @@
+import uuid
+from fastapi import HTTPException
 from supabase_setup import supabase
 
 async def get_user_name_from_id(user_id):
@@ -225,3 +227,123 @@ async def update_voucher_request(voucher_id):
     # Update voucher request status
     response = supabase.from_("items").update({"status": "APPROVED"}).eq("id", voucher_id).execute()
     return response
+
+async def get_user_points(user_id: str):
+    """Get user's current voucher points"""
+    response = supabase.from_("users").select("voucher_points").eq("uid", user_id).execute()
+    if not response.data:
+        return None
+    return response.data[0]["voucher_points"]
+
+async def get_product_details(product_id: str):
+    """Get product details including name, price, and quantity"""
+    response = supabase.from_("products").select("*").eq("id", product_id).execute()
+    if not response.data:
+        return None
+    return response.data[0]
+
+async def update_product_quantity(product_id: str, quantity: int):
+    """Update product quantity after purchase"""
+    # Get current quantity first
+    current = await get_product_details(product_id)
+    new_quantity = current["qty"] - quantity
+    
+    response = supabase.from_("products").update(
+        {"qty": new_quantity}
+    ).eq("id", product_id).execute()
+    return response
+
+async def update_user_points(user_id: str, cost: float):
+    """Update user's voucher points after purchase"""
+    # Get current points first
+    current_points = await get_user_points(user_id)
+    new_points = current_points - cost
+    
+    response = supabase.from_("users").update(
+        {"voucher_points": new_points}
+    ).eq("uid", user_id).execute()
+    return response
+
+async def record_purchase_transaction(user_id: str, product_id: int, quantity: int, amount: float):
+    """Record the purchase transaction"""
+    response = supabase.from_("voucher_outflow").insert([{
+        "recipient_id": user_id,
+        "product_id": product_id,
+        "quantity": quantity,
+        "amount": amount
+    }]).execute()
+    return response
+
+async def process_purchase(product_id: str, user_id: str, quantity: int = 1):
+    try:
+        # Get product details
+        product = await get_product_details(product_id)
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
+        
+        # Get user's points
+        user_points = await get_user_points(user_id)
+        if user_points is None:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        total_cost = product["price"] * quantity
+        
+        # Validate sufficient stock
+        if product["qty"] < quantity:
+            raise HTTPException(status_code=400, detail="Insufficient stock")
+        
+        # Validate sufficient voucher points
+        if user_points < total_cost:
+            raise HTTPException(status_code=400, detail="Insufficient voucher points")
+        
+        # 1. Update product quantity in products table
+        update_product_response = await update_product_quantity(product_id, quantity)
+        if not update_product_response:
+            raise HTTPException(status_code=500, detail="Failed to update product quantity")
+        
+        # 2. Create items - one at a time to get their IDs
+        item_ids = []
+        for _ in range(quantity):
+            items_response = supabase.from_("items").insert({
+                "product_id": product_id,
+                "status": "READY",
+                "user_id": user_id,
+                "id": str(uuid.uuid4())
+            }).execute()
+            
+            if not items_response or not items_response.data:
+                raise HTTPException(status_code=500, detail="Failed to create item")
+            
+            item_ids.append(items_response.data[0]["id"])
+
+        # 3. Create voucher outflows - one for each item
+        for item_id in item_ids:
+            outflow_response = supabase.from_("voucher_outflow").insert({
+                "recipient_id": user_id,
+                "product_id": product_id,
+                "item_id": item_id,
+                "amount": product["price"]
+            }).execute()
+            
+            if not outflow_response:
+                raise HTTPException(status_code=500, detail="Failed to record voucher outflow")
+
+        # 4. Update user's voucher points
+        update_points_response = await update_user_points(user_id, total_cost)
+        if not update_points_response:
+            raise HTTPException(status_code=500, detail="Failed to update user points")
+        
+        return {
+            "message": "Purchase successful",
+            "transaction": {
+                "product_name": product["name"],
+                "quantity": quantity,
+                "total_cost": total_cost,
+                "item_ids": item_ids
+            }
+        }
+        
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

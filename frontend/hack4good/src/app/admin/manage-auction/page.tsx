@@ -2,6 +2,8 @@
 import axiosInstance from "@/utils/axiosInstance";
 import { AuctionItem } from "@/utils/interfaces";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 
 export default function ManageAuctions() {
   const [auctionItems, setAuctionItems] = useState<AuctionItem[]>([]);
@@ -9,6 +11,7 @@ export default function ManageAuctions() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newAuction, setNewAuction] = useState({ name: "", description: "" });
   const [toggle, setToggle] = useState(false);  
+  const router = useRouter();
     // Fetch auction items from the API
     useEffect(() => {
       async function fetchAuctionItems() {
@@ -142,6 +145,17 @@ export default function ManageAuctions() {
           </div>
         </div>
       )}
+      <div className="mt-6 flex justify-center">
+        
+        <button
+          onClick={() => router.push("/admin/landing-page")}
+          className="flex items-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
+        >
+          <ArrowLeftIcon className="h-5 w-5 mr-2" />
+          Back To Landing Page
+        </button>
+      
+    </div>
     </div>
   );
 }
